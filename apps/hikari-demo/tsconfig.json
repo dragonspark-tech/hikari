@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "files": [],
+  "include": [],
+  "references": [
+    {
+      "path": "../../packages/hikari-effects"
+    },
+    {
+      "path": "../../packages/hikari"
+    },
+    {
+      "path": "./tsconfig.app.json"
+    }
+  ]
+}

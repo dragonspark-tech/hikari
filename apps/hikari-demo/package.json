@@ -1,0 +1,9 @@
+{
+  "name": "@dragonspark/hikari-demo",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "@dragonspark/hikari": "workspace:*",
+    "@dragonspark/hikari-effects": "workspace:*"
+  }
+}

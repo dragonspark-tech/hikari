@@ -1,6 +1,7 @@
 packages:
-  - packages/*
+  - 'packages/*'
+  - 'apps/*'
 onlyBuiltDependencies:
-  - core-js
-  - esbuild
-  - nx
+  - 'core-js'
+  - 'esbuild'
+  - 'nx'
