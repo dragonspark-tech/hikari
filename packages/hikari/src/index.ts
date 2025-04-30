@@ -1,1 +1,1 @@
-export * from './lib/hikari';
+export { HikariGL, type HikariGLOptions } from './hikari';
