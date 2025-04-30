@@ -8,6 +8,9 @@
     },
     {
       "path": "./packages/hikari-effects"
+    },
+    {
+      "path": "./apps/hikari-demo"
     }
   ]
 }

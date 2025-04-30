@@ -66,5 +66,13 @@
     "test": {
       "dependsOn": ["^build"]
     }
+  },
+  "generators": {
+    "@nx/web:application": {
+      "style": "css",
+      "linter": "eslint",
+      "unitTestRunner": "none",
+      "e2eTestRunner": "none"
+    }
   }
 }
