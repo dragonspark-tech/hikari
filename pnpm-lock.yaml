@@ -44,6 +44,9 @@ importers:
       '@types/node':
         specifier: 18.16.9
         version: 18.16.9
+      '@types/webgl2':
+        specifier: ^0.0.11
+        version: 0.0.11
       '@vitest/coverage-v8':
         specifier: ^3.0.5
         version: 3.1.2(vitest@3.1.2)
@@ -94,6 +97,8 @@ importers:
         version: 3.1.2(@types/node@18.16.9)(@vitest/ui@3.1.2)(jiti@2.4.2)(terser@5.39.0)(yaml@2.7.1)
 
   packages/hikari: {}
+
+  packages/hikari-effects: {}
 
 packages:
 
@@ -1455,6 +1460,9 @@ packages:
 
   '@types/resolve@1.20.2':
     resolution: {integrity: sha512-60BCwRFOZCQhDncwQdxxeOEEkbc5dIMccYLwbxsS4TUNeVECQ/pBJ0j09mrHOl/JJvpRPGwO9SvE4nR2Nb/a4Q==}
+
+  '@types/webgl2@0.0.11':
+    resolution: {integrity: sha512-LFa4je4lUbqDVRNeC2W1ZRM8dOgsGsm23MZO7m/EllCVg07yB65W3eUF4MAM+0LU9X6x/0NTrvXxAW0pmipNdw==}
 
   '@typescript-eslint/eslint-plugin@8.31.1':
     resolution: {integrity: sha512-oUlH4h1ABavI4F0Xnl8/fOtML/eu8nI2A1nYd+f+55XI0BLu+RIqKoCiZKNo6DtqZBEQm5aNKA20G3Z5w3R6GQ==}
@@ -6163,6 +6171,8 @@ snapshots:
   '@types/parse-json@4.0.2': {}
 
   '@types/resolve@1.20.2': {}
+
+  '@types/webgl2@0.0.11': {}
 
   '@typescript-eslint/eslint-plugin@8.31.1(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.25.1(jiti@2.4.2))(typescript@5.7.3)':
     dependencies:

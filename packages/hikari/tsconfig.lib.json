@@ -9,7 +9,7 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "forceConsistentCasingInFileNames": true,
-    "types": ["node"]
+    "types": ["node", "webgl2"]
   },
   "include": ["src/**/*.ts"],
   "references": [],
