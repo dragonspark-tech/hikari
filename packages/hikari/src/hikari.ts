@@ -1,8 +1,4 @@
-import { Mesh } from './core/mesh';
-import { Uniform } from './core/uniform';
-import { Attribute } from './core/attribute';
-import { Material } from './core/material';
-import { PlaneGeometry } from './core/plane-geometry';
+import { Attribute, Material, Mesh, PlaneGeometry, Uniform } from './core';
 
 export interface HikariGLOptions {
   canvas: HTMLCanvasElement;

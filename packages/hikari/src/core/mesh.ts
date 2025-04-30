@@ -16,7 +16,7 @@ export class Mesh {
   material: Material;
   wireframe: boolean = false;
   attributeInstances: AttributeInstance[] = [];
-  private context: WebGLRenderingContext;
+  private readonly context: WebGLRenderingContext;
 
   /**
    * Creates an instance of the class to handle rendering of a plane geometry with a specified material in a WebGL context.
@@ -24,7 +24,6 @@ export class Mesh {
    * @param {WebGLRenderingContext} context - The WebGL context used for rendering.
    * @param {PlaneGeometry} geometry - The geometry data describing the plane.
    * @param {Material} material - The material providing shaders and rendering properties for the geometry.
-   * @return {void}
    */
   constructor(context: WebGLRenderingContext, geometry: PlaneGeometry, material: Material) {
     this.context = context;
@@ -63,11 +62,26 @@ export class Mesh {
     });
 
     // Draw elements
-    this.context.drawElements(
-      this.wireframe ? this.context.LINES : this.context.TRIANGLES,
-      this.geometry.attributes.index.values!.length,
-      this.context.UNSIGNED_SHORT,
-      0
-    );
+    if (this.wireframe) {
+      // Set line width
+      this.context.lineWidth(1.5);
+
+      // Use GL_LINES mode with the existing indices
+      // This will draw the edges of each triangle
+      this.context.drawElements(
+        this.context.LINES,
+        this.geometry.attributes.index.values!.length,
+        this.context.UNSIGNED_SHORT,
+        0
+      );
+    } else {
+      // Draw triangles normally
+      this.context.drawElements(
+        this.context.TRIANGLES,
+        this.geometry.attributes.index.values!.length,
+        this.context.UNSIGNED_SHORT,
+        0
+      );
+    }
   }
 }
