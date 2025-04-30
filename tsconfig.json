@@ -11,6 +11,9 @@
     },
     {
       "path": "./apps/hikari-demo"
+    },
+    {
+      "path": "./packages/hikari-react"
     }
   ]
 }

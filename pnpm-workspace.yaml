@@ -1,7 +1,8 @@
 packages:
-  - 'packages/*'
-  - 'apps/*'
+  - packages/*
+  - apps/*
 onlyBuiltDependencies:
-  - 'core-js'
-  - 'esbuild'
-  - 'nx'
+  - '@swc/core'
+  - core-js
+  - esbuild
+  - nx
