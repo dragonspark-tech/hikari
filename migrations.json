@@ -1,0 +1,11 @@
+{
+  "migrations": [
+    {
+      "version": "21.0.0-beta.1",
+      "description": "Updates release version config based on the breaking changes in Nx v21",
+      "implementation": "./src/migrations/update-21-0-0/release-version-config-changes",
+      "package": "nx",
+      "name": "release-version-config-changes"
+    }
+  ]
+}
