@@ -4,10 +4,12 @@ import {
   MorphGradientOptions
 } from '@dragonspark/hikari-effects';
 
+export type MorphGradientInitCallback = (gradient: HikariMorphGradient) => void;
+
 export interface MorphGradientProps extends Omit<MorphGradientOptions, 'selector'> {
   className?: string;
   style?: CSSProperties;
-  onInit?: (gradient: HikariMorphGradient) => void;
+  onInit?: MorphGradientInitCallback;
 }
 
 /**
@@ -16,7 +18,8 @@ export interface MorphGradientProps extends Omit<MorphGradientOptions, 'selector
  * @param {MorphGradientProps} props - The properties passed to configure the gradient.
  * @property {string} [props.className] - Optional CSS class to apply to the `<canvas>` element.
  * @property {React.CSSProperties} [props.style] - Inline styles to apply to the `<canvas>` element.
- * @property {string[]} props.colors - An array of color values to define the gradient stops.
+ * @property {string} [props.baseColor] - The base color for the gradient. If not provided, defaults to '#a960ee'.
+ * @property {string[]} [props.waveColors] - An array of wave colors for the gradient. At least one color is required. If not provided, defaults to ['#ff333d', '#90e0ff', '#ffcb57'].
  * @property {number} [props.amplitude] - The amplitude of the gradient's wave motion.
  * @property {number} [props.seed] - A seed value to generate a consistent random gradient pattern.
  * @property {number} [props.freqX] - Frequency of the wave pattern in the horizontal direction.
@@ -30,11 +33,13 @@ export interface MorphGradientProps extends Omit<MorphGradientOptions, 'selector
  * @remarks
  * - The `HikariMorphGradient` instance is internally created and managed to control the gradient animation.
  * - The component automatically cleans up the gradient instance when it is unmounted to avoid memory leaks.
+ * - The gradient requires at least two colors: a base color and at least one wave color.
  */
 export const MorphGradient = ({
   className,
   style,
-  colors,
+  baseColor,
+  waveColors,
   amplitude,
   seed,
   freqX,
@@ -56,7 +61,8 @@ export const MorphGradient = ({
       // Initialize the gradient
       const gradient = new HikariMorphGradient({
         selector: `#${canvasId}`,
-        colors,
+        baseColor,
+        waveColors,
         amplitude,
         seed,
         freqX,
@@ -86,7 +92,7 @@ export const MorphGradient = ({
     }
 
     return () => {};
-  }, [colors, amplitude, seed, freqX, freqY, freqDelta, darkenTop, onInit]);
+  }, [baseColor, waveColors, amplitude, seed, freqX, freqY, freqDelta, darkenTop, onInit]);
 
   return (
     <canvas
