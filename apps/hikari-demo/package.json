@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@dragonspark/hikari": "workspace:*",
-    "@dragonspark/hikari-effects": "workspace:*"
+    "@dragonspark/hikari-effects": "workspace:*",
+    "@dragonspark/hikari-react": "workspace:*"
   }
 }
