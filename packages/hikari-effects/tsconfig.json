@@ -4,6 +4,9 @@
   "include": [],
   "references": [
     {
+      "path": "../hikari"
+    },
+    {
       "path": "./tsconfig.lib.json"
     },
     {

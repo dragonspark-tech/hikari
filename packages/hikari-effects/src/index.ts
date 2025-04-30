@@ -1,1 +1,1 @@
-export * from './lib/hikari-effects';
+export * from './modules';
