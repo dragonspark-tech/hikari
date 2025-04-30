@@ -36,7 +36,8 @@ import { MorphGradient } from '@dragonspark/hikari-effects';
 // Initialize the gradient on a canvas element
 const gradient = new MorphGradient({
   selector: '#canvas',
-  colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00']
+  baseColor: '#ff0000',
+  waveColors: ['#00ff00', '#0000ff', '#ffff00']
 });
 ```
 
@@ -58,6 +59,34 @@ You can define gradient colors using CSS variables:
 const gradient = new MorphGradient({
   selector: '#canvas'
 });
+```
+
+You can also pass CSS variables directly:
+
+```javascript
+const gradient = new MorphGradient({
+  selector: '#canvas',
+  baseColor: 'var(--gradient-color-1)',
+  waveColors: [
+    'var(--gradient-color-2)',
+    'var(--gradient-color-3)',
+    'var(--gradient-color-4)'
+  ]
+});
+```
+
+If CSS variables are not available or parsing fails, the component will fall back to these default values:
+
+```javascript
+// Default base color
+const defaultBaseColor = '#a960ee'; // Purple
+
+// Default wave colors
+const defaultWaveColors = [
+  '#ff333d', // Red
+  '#90e0ff', // Light blue
+  '#ffcb57'  // Yellow
+];
 ```
 
 #### Customizing the Gradient
@@ -101,7 +130,17 @@ new MorphGradient(options)
 ```
 
 - `options.selector`: string - CSS selector for the canvas element
-- `options.colors`: string[] (optional) - Array of hex color strings
+- `options.baseColor`: string (optional) - Base color for the gradient. Can be:
+  - Hex color code (e.g., '#ff0000')
+  - CSS variable name (e.g., '--gradient-color-1')
+  - CSS variable reference (e.g., 'var(--gradient-color-1)')
+  - If not provided, falls back to CSS variables or default base color ('#a960ee')
+- `options.waveColors`: string[] (optional) - Array of wave colors for the gradient. Can be:
+  - Hex color codes (e.g., '#ff0000')
+  - CSS variable names (e.g., '--gradient-color-1')
+  - CSS variable references (e.g., 'var(--gradient-color-1)')
+  - At least one color is required
+  - If not provided, falls back to CSS variables or default wave colors
 - `options.amplitude`: number (optional) - Wave amplitude
 - `options.seed`: number (optional) - Random seed
 - `options.freqX`: number (optional) - X-axis frequency
@@ -132,7 +171,8 @@ document.body.appendChild(canvas);
 // Initialize gradient
 const gradient = new MorphGradient({
   selector: '#gradient-bg',
-  colors: ['#3498db', '#9b59b6', '#e74c3c', '#f1c40f']
+  baseColor: '#3498db',
+  waveColors: ['#9b59b6', '#e74c3c', '#f1c40f']
 });
 
 // Handle window resize

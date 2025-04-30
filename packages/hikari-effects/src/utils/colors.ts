@@ -5,9 +5,5 @@
  * @return {[number, number, number]} An array containing the normalized red, green, and blue values, each scaled between 0 and 1.
  */
 export function normalizeColor(hexCode: number): [number, number, number] {
-  return [
-    ((hexCode >> 16) & 255) / 255,
-    ((hexCode >> 8) & 255) / 255,
-    (255 & hexCode) / 255
-  ];
+  return [((hexCode >> 16) & 255) / 255, ((hexCode >> 8) & 255) / 255, (255 & hexCode) / 255];
 }
