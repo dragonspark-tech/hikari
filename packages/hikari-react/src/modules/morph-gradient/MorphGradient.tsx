@@ -46,7 +46,11 @@ export const MorphGradient = ({
   freqY,
   freqDelta,
   darkenTop,
-  onInit
+  onInit,
+  wireframe,
+  zoom,
+  rotation,
+  density
 }: MorphGradientProps): ReactElement => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gradientRef = useRef<HikariMorphGradient | null>(null);
@@ -68,7 +72,11 @@ export const MorphGradient = ({
         freqX,
         freqY,
         freqDelta,
-        darkenTop
+        darkenTop,
+        wireframe,
+        zoom,
+        rotation,
+        density
       });
 
       // Store the gradient instance
@@ -92,7 +100,7 @@ export const MorphGradient = ({
     }
 
     return () => {};
-  }, [baseColor, waveColors, amplitude, seed, freqX, freqY, freqDelta, darkenTop, onInit]);
+  }, [baseColor, waveColors, amplitude, seed, freqX, freqY, freqDelta, darkenTop, onInit, wireframe, zoom, rotation, density]);
 
   return (
     <canvas

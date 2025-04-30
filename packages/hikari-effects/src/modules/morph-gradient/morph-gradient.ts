@@ -3,7 +3,7 @@ import { fragmentShader } from '../../shaders/fragment';
 import { noiseShader } from '../../shaders/noise';
 import { blendShader } from '../../shaders/blend';
 import { normalizeColor } from '../../utils/colors';
-import { HikariGL } from '@dragonspark/hikari';
+import { HikariGL, Mesh, Material, PlaneGeometry, Uniform } from '@dragonspark/hikari';
 
 interface ShaderFiles {
   vertex: string;
@@ -31,6 +31,10 @@ export interface MorphGradientOptions {
   freqY?: number;
   freqDelta?: number;
   darkenTop?: boolean;
+  wireframe?: boolean;
+  zoom?: number;
+  rotation?: number;
+  density?: [number, number];
 }
 
 export class MorphGradient {
@@ -66,7 +70,7 @@ export class MorphGradient {
   conf: MorphGradientConfig;
 
   // Uniforms for WebGL
-  uniforms: Record<string, any> = {};
+  uniforms: Record<string, Uniform> = {};
 
   // Animation properties
   t: number = 1253106;
@@ -80,15 +84,12 @@ export class MorphGradient {
   // Mesh properties
   xSegCount: number = 0;
   ySegCount: number = 0;
-  mesh: any;
-  material: any;
-  geometry: any;
+  mesh!: Mesh;
+  material!: Material | null;
+  geometry!: PlaneGeometry;
 
   // WebGL
   hikari: HikariGL | null = null;
-
-  // Scroll observer
-  scrollObserver: any = null;
 
   // Wave properties
   amp: number = 320;
@@ -96,6 +97,7 @@ export class MorphGradient {
   freqX: number = 14e-5;
   freqY: number = 29e-5;
   freqDelta: number = 1e-5;
+  darkenTop?: boolean = true;
 
   // Active colors
   activeColors: number[] = [1, 1, 1, 1];
@@ -128,7 +130,7 @@ export class MorphGradient {
     this.conf = {
       presetName: '',
       wireframe: false,
-      density: [0.08, 0.12],
+      density: [0.06, 0.16],
       zoom: 1,
       rotation: 0,
       playing: true
@@ -141,10 +143,17 @@ export class MorphGradient {
       if (options.freqX !== undefined) this.freqX = options.freqX;
       if (options.freqY !== undefined) this.freqY = options.freqY;
       if (options.freqDelta !== undefined) this.freqDelta = options.freqDelta;
+      if (options.darkenTop !== undefined) this.darkenTop = options.darkenTop;
 
       // Handle color options
       if (options.baseColor !== undefined) this.optionBaseColor = options.baseColor;
       if (options.waveColors !== undefined) this.optionWaveColors = options.waveColors;
+
+      // Apply configuration options
+      if (options.wireframe !== undefined) this.conf.wireframe = options.wireframe;
+      if (options.zoom !== undefined) this.conf.zoom = options.zoom;
+      if (options.rotation !== undefined) this.conf.rotation = options.rotation;
+      if (options.density !== undefined) this.conf.density = options.density;
 
       // Initialize gradient if the selector is provided
       if (options.selector) {
@@ -195,7 +204,9 @@ export class MorphGradient {
 
     this.width = window.innerWidth;
     this.hikari.setSize(this.width, this.height);
-    this.hikari.setOrthographicCamera();
+
+    // Apply zoom and rotation transformations
+    this.applyTransformations();
 
     this.xSegCount = Math.ceil(this.width * this.conf.density[0]);
     this.ySegCount = Math.ceil(this.height * this.conf.density[1]);
@@ -204,6 +215,63 @@ export class MorphGradient {
     this.mesh.geometry.setSize(this.width, this.height);
 
     this.mesh.material.uniforms.u_shadow_power.value = this.width < 600 ? 5 : 6;
+    this.mesh.wireframe = this.conf.wireframe;
+  };
+
+  /**
+   * Applies transformations, including zoom and rotation, to the current orthographic camera's projection matrix.
+   *
+   * This method adjusts the camera's projection matrix based on the configured zoom level and rotation angle:
+   * - Adjusts the zoom by scaling the matrix values while ensuring a minimum safe zoom level.
+   * - Applies a 2D rotation transformation to the matrix based on the specified rotation angle in degrees.
+   *
+   * Preconditions:
+   * - The `hikari` instance must be available.
+   *
+   * Effects:
+   * - Modifies the `projectionMatrix` within `hikari.commonUniforms` to reflect the applied transformations.
+   *
+   * Note:
+   * - Prevents zoom level from becoming too small to avoid extreme blurriness.
+   */
+  applyTransformations = (): void => {
+    if (!this.hikari) return;
+
+    // Set up the basic orthographic camera
+    this.hikari.setOrthographicCamera();
+
+    // Get the current projection matrix
+    const matrix = [...this.hikari.commonUniforms.projectionMatrix.value];
+
+    // Apply zoom by scaling the matrix
+    if (this.conf.zoom !== 1) {
+      // Ensure zoom is not too small to prevent extreme blurriness
+      const safeZoom = Math.max(0.5, this.conf.zoom);
+      matrix[0] *= safeZoom; // Scale X
+      matrix[5] *= safeZoom; // Scale Y
+    }
+
+    // Apply rotation by modifying the matrix
+    if (this.conf.rotation !== 0) {
+      const rotationRad = this.conf.rotation * Math.PI / 180; // Convert degrees to radians
+      const cosTheta = Math.cos(rotationRad);
+      const sinTheta = Math.sin(rotationRad);
+
+      // Store original values
+      const m0 = matrix[0];
+      const m1 = matrix[1];
+      const m4 = matrix[4];
+      const m5 = matrix[5];
+
+      // Apply rotation to the matrix (2D rotation)
+      matrix[0] = m0 * cosTheta - m1 * sinTheta;
+      matrix[1] = m0 * sinTheta + m1 * cosTheta;
+      matrix[4] = m4 * cosTheta - m5 * sinTheta;
+      matrix[5] = m4 * sinTheta + m5 * cosTheta;
+    }
+
+    // Update the projection matrix
+    this.hikari.commonUniforms.projectionMatrix.value = matrix;
   };
 
   /**
@@ -284,7 +352,7 @@ export class MorphGradient {
    * The method checks if the `el` property exists and whether the `isLoadedClass` flag
    * is not already set. If the conditions are met, it adds the 'isLoaded' class to the
    * `el` element and sets the `isLoadedClass` flag to `true`. After a delay of 3 seconds,
-   * the 'isLoaded' class is also added to the parent element of `el`, if it exists.
+   * the 'isLoaded' class is also added to the parent element of `el` if it exists.
    *
    * @returns {void}
    */
@@ -384,10 +452,8 @@ export class MorphGradient {
    * Disconnects event listeners and updates the status of the instance.
    * The method removes the scroll and resize event listeners from the window,
    * sets the intersection state to false, and updates the playing configuration.
-   *
-   * @return {void} Does not return any value.
    */
-  disconnect(): void {
+  disconnect() {
     window.removeEventListener('scroll', this.handleScroll);
     window.removeEventListener('resize', this.resize);
 
@@ -537,7 +603,7 @@ export class MorphGradient {
   /**
    * Initialize the material for the gradient
    */
-  initMaterial(): any {
+  initMaterial(): Material | null {
     if (!this.hikari) return null;
 
     // Create uniforms
@@ -549,7 +615,7 @@ export class MorphGradient {
         value: 5
       }),
       u_darken_top: this.hikari.createUniform({
-        value: this.el && this.el.dataset.jsDarkenTop === '' ? 1 : 0
+        value: this.darkenTop ? 1 : 0
       }),
       u_active_colors: this.hikari.createUniform({
         value: this.activeColors,
@@ -667,7 +733,8 @@ export class MorphGradient {
       this.xSegCount,
       this.ySegCount
     );
-    this.mesh = this.hikari.createMesh(this.geometry, this.material);
+    this.mesh = this.hikari.createMesh(this.geometry, this.material!);
+    this.mesh.wireframe = this.conf.wireframe;
   }
 
   /**
@@ -696,5 +763,37 @@ export class MorphGradient {
    */
   toggleColor(index: number): void {
     this.activeColors[index] = this.activeColors[index] === 0 ? 1 : 0;
+  }
+
+  /**
+   * Sets the zoom level for the current configuration and applies the necessary transformations.
+   *
+   * @param {number} zoom - The desired zoom level to be set.
+   */
+  setZoom(zoom: number): void {
+    this.conf.zoom = zoom;
+    this.applyTransformations();
+  }
+
+  /**
+   * Set the rotation angle
+   * @param rotation Rotation angle in degrees
+   */
+  setRotation(rotation: number): void {
+    this.conf.rotation = rotation;
+    this.applyTransformations();
+  }
+
+  /**
+   * Set the density of the mesh
+   * @param density Density as [x, y] values
+   */
+  setDensity(density: [number, number]): void {
+    this.conf.density = density;
+    if (this.hikari) {
+      this.xSegCount = Math.ceil(this.width * this.conf.density[0]);
+      this.ySegCount = Math.ceil(this.height * this.conf.density[1]);
+      this.mesh.geometry.setTopology(this.xSegCount, this.ySegCount);
+    }
   }
 }
