@@ -1,11 +1,172 @@
-# hikari-effects
+# @dragonspark/hikari-effects
 
-This library was generated with [Nx](https://nx.dev).
+> Ready-to-use visual effects built on top of the [@dragonspark/hikari](https://www.npmjs.com/package/@dragonspark/hikari) WebGL framework.
 
-## Building
+[![npm version](https://img.shields.io/npm/v/@dragonspark/hikari-effects.svg?style=for-the-badge)](https://www.npmjs.com/package/@dragonspark/hikari-effects)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-Run `nx build hikari-effects` to build the library.
+## 🧩 Features
 
-## Running unit tests
+- Pre-built, customizable WebGL effects
+- Seamless integration with hikari
+- Responsive and performant animations
+- Easy-to-use API
 
-Run `nx test hikari-effects` to execute the unit tests via [Vitest](https://vitest.dev/).
+## ⚙️ Installation
+
+```bash
+npm install @dragonspark/hikari-effects @dragonspark/hikari
+# or
+yarn add @dragonspark/hikari-effects @dragonspark/hikari
+```
+
+Note: `@dragonspark/hikari` is a peer dependency and must be installed alongside this package.
+
+## ✨ Available Effects
+
+### MorphGradient
+
+A beautiful, animated gradient background effect with morphing colors and shapes.
+
+#### Basic Usage
+
+```javascript
+import { MorphGradient } from '@dragonspark/hikari-effects';
+
+// Initialize the gradient on a canvas element
+const gradient = new MorphGradient({
+  selector: '#canvas',
+  colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00']
+});
+```
+
+#### Using CSS Variables
+
+You can define gradient colors using CSS variables:
+
+```css
+:root {
+  --gradient-color-1: #ff0000;
+  --gradient-color-2: #00ff00;
+  --gradient-color-3: #0000ff;
+  --gradient-color-4: #ffff00;
+}
+```
+
+```javascript
+// The gradient will automatically use the CSS variables
+const gradient = new MorphGradient({
+  selector: '#canvas'
+});
+```
+
+#### Customizing the Gradient
+
+```javascript
+const gradient = new MorphGradient({
+  selector: '#canvas',
+  amplitude: 320,       // Wave amplitude
+  seed: 5,              // Random seed
+  freqX: 14e-5,         // X-axis frequency
+  freqY: 29e-5,         // Y-axis frequency
+  freqDelta: 1e-5,      // Frequency change rate
+  darkenTop: true       // Darken the top of the gradient
+});
+```
+
+#### Controlling Animation
+
+```javascript
+// Pause animation
+gradient.pause();
+
+// Resume animation
+gradient.play();
+
+// Update frequency
+gradient.updateFrequency(0.001);
+
+// Toggle specific color
+gradient.toggleColor(0); // Toggle first color
+```
+
+## 📖 API Reference
+
+### MorphGradient
+
+#### Constructor Options
+
+```javascript
+new MorphGradient(options)
+```
+
+- `options.selector`: string - CSS selector for the canvas element
+- `options.colors`: string[] (optional) - Array of hex color strings
+- `options.amplitude`: number (optional) - Wave amplitude
+- `options.seed`: number (optional) - Random seed
+- `options.freqX`: number (optional) - X-axis frequency
+- `options.freqY`: number (optional) - Y-axis frequency
+- `options.freqDelta`: number (optional) - Frequency change rate
+- `options.darkenTop`: boolean (optional) - Darken the top of the gradient
+
+#### Methods
+
+- `play()`: Start/resume the animation
+- `pause()`: Pause the animation
+- `updateFrequency(delta)`: Update the frequency by the specified delta
+- `toggleColor(index)`: Toggle the visibility of a color by index
+- `resize()`: Resize the gradient to fit the container
+
+## 💡 Examples
+
+### Responsive Gradient Background
+
+```javascript
+import { MorphGradient } from '@dragonspark/hikari-effects';
+
+// Create canvas element
+const canvas = document.createElement('canvas');
+canvas.id = 'gradient-bg';
+document.body.appendChild(canvas);
+
+// Initialize gradient
+const gradient = new MorphGradient({
+  selector: '#gradient-bg',
+  colors: ['#3498db', '#9b59b6', '#e74c3c', '#f1c40f']
+});
+
+// Handle window resize
+window.addEventListener('resize', () => {
+  gradient.resize();
+});
+```
+
+### Interactive Gradient
+
+```javascript
+import { MorphGradient } from '@dragonspark/hikari-effects';
+
+const gradient = new MorphGradient({
+  selector: '#interactive-gradient'
+});
+
+// Toggle colors on click
+document.querySelectorAll('.color-toggle').forEach((button, index) => {
+  button.addEventListener('click', () => {
+    gradient.toggleColor(index);
+  });
+});
+
+// Pause/play on button click
+document.querySelector('#play-pause').addEventListener('click', () => {
+  if (gradient.conf.playing) {
+    gradient.pause();
+  } else {
+    gradient.play();
+  }
+});
+```
+
+## 📝 License
+
+MIT © DragonSpark
