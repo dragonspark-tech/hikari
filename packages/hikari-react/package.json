@@ -1,7 +1,7 @@
 {
   "name": "@dragonspark/hikari-react",
   "description": "React components and hooks for the @dragonspark/hikari WebGL framework.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
   "repository": {
     "type": "git",
