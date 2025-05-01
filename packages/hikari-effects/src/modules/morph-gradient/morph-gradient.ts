@@ -35,6 +35,7 @@ export interface MorphGradientOptions {
   zoom?: number;
   rotation?: number;
   density?: [number, number];
+  maxFrameTimeStep?: number;
 }
 
 export class MorphGradient {
@@ -42,16 +43,16 @@ export class MorphGradient {
   el: HTMLCanvasElement | null = null;
 
   // CSS variable handling
-  cssVarRetries: number = 0;
-  maxCssVarRetries: number = 200;
+  cssVarRetries = 0;
+  maxCssVarRetries = 200;
 
   // Gradient properties
-  angle: number = 0;
-  isLoadedClass: boolean = false;
-  isScrolling: boolean = false;
+  angle = 0;
+  isLoadedClass = false;
+  isScrolling = false;
   scrollingTimeout: number | undefined;
-  scrollingRefreshDelay: number = 200;
-  isIntersecting: boolean = false;
+  scrollingRefreshDelay = 200;
+  isIntersecting = false;
 
   // Shader files
   shaderFiles: ShaderFiles;
@@ -60,7 +61,7 @@ export class MorphGradient {
   sectionColors: [number, number, number][] = [];
   optionBaseColor: string | null = null;
   optionWaveColors: string[] | null = null;
-  defaultBaseColor: string = '#a960ee';
+  defaultBaseColor = '#a960ee';
   defaultWaveColors: string[] = ['#ff333d', '#90e0ff', '#ffcb57'];
 
   // Canvas style
@@ -73,17 +74,18 @@ export class MorphGradient {
   uniforms: Record<string, Uniform> = {};
 
   // Animation properties
-  t: number = 1253106;
-  last: number = 0;
+  t = 1253106;
+  last = 0;
+  maxFrameTimeStep = 60;
 
   // Canvas dimensions
   width: number = window.innerWidth;
-  minWidth: number = 1111;
-  height: number = 600;
+  minWidth = 1111;
+  height = 600;
 
   // Mesh properties
-  xSegCount: number = 0;
-  ySegCount: number = 0;
+  xSegCount = 0;
+  ySegCount = 0;
   mesh!: Mesh;
   material!: Material | null;
   geometry!: PlaneGeometry;
@@ -92,11 +94,11 @@ export class MorphGradient {
   hikari: HikariGL | null = null;
 
   // Wave properties
-  amp: number = 320;
-  seed: number = 5;
-  freqX: number = 14e-5;
-  freqY: number = 29e-5;
-  freqDelta: number = 1e-5;
+  amp = 320;
+  seed = 5;
+  freqX = 14e-5;
+  freqY = 29e-5;
+  freqDelta = 1e-5;
   darkenTop?: boolean = true;
 
   // Active colors
@@ -144,6 +146,7 @@ export class MorphGradient {
       if (options.freqY !== undefined) this.freqY = options.freqY;
       if (options.freqDelta !== undefined) this.freqDelta = options.freqDelta;
       if (options.darkenTop !== undefined) this.darkenTop = options.darkenTop;
+      if (options.maxFrameTimeStep !== undefined) this.maxFrameTimeStep = options.maxFrameTimeStep;
 
       // Handle color options
       if (options.baseColor !== undefined) this.optionBaseColor = options.baseColor;
@@ -310,16 +313,16 @@ export class MorphGradient {
     if (this.shouldSkipFrame(timestamp)) return;
 
     // initialize last timestamp on first frame
-    if (this.last === 0) {
-      this.last = timestamp;
-    }
+    // if (this.last === 0) {
+    //   this.last = timestamp;
+    // }
 
     // compute full delta since last frame
     const delta = timestamp - this.last;
-    this.last = timestamp;
 
-    // advance the time uniform by the full true delta
-    this.t += delta;
+    // advance the time uniform by the full delta or time clamp
+    this.t += this.maxFrameTimeStep === 0 ? delta : Math.min(timestamp - this.last, 1000 / this.maxFrameTimeStep);
+    this.last = timestamp;
 
     // update shader and render
     this.mesh.material.uniforms.u_time.value = this.t;

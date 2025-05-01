@@ -56,7 +56,7 @@ You can define gradient colors using CSS variables:
 
 ```javascript
 // The gradient will automatically use the CSS variables
-const gradient = new MorphGradient({
+const gradient = new MorphGradientCanvas({
   selector: '#canvas'
 });
 ```
@@ -64,7 +64,7 @@ const gradient = new MorphGradient({
 You can also pass CSS variables directly:
 
 ```javascript
-const gradient = new MorphGradient({
+const gradient = new MorphGradientCanvas({
   selector: '#canvas',
   baseColor: 'var(--gradient-color-1)',
   waveColors: [
@@ -92,7 +92,7 @@ const defaultWaveColors = [
 #### Customizing the Gradient
 
 ```javascript
-const gradient = new MorphGradient({
+const gradient = new MorphGradientCanvas({
   selector: '#canvas',
   amplitude: 320,       // Wave amplitude
   seed: 5,              // Random seed
@@ -126,7 +126,7 @@ gradient.toggleColor(0); // Toggle first color
 #### Constructor Options
 
 ```javascript
-new MorphGradient(options)
+new MorphGradientCanvas(options)
 ```
 
 - `options.selector`: string - CSS selector for the canvas element
