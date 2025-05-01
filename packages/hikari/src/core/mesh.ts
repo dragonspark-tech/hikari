@@ -14,7 +14,7 @@ interface AttributeInstance {
 export class Mesh {
   geometry: PlaneGeometry;
   material: Material;
-  wireframe: boolean = false;
+  wireframe = false;
   attributeInstances: AttributeInstance[] = [];
   private readonly context: WebGLRenderingContext;
 
@@ -61,27 +61,29 @@ export class Mesh {
       attribute.use(location);
     });
 
-    // Draw elements
-    if (this.wireframe) {
-      // Set line width
-      this.context.lineWidth(1.5);
+    if (this.geometry.attributes.index.values) {
+      // Draw elements
+      if (this.wireframe) {
+        // Set line width
+        this.context.lineWidth(1.5);
 
-      // Use GL_LINES mode with the existing indices
-      // This will draw the edges of each triangle
-      this.context.drawElements(
-        this.context.LINES,
-        this.geometry.attributes.index.values!.length,
-        this.context.UNSIGNED_SHORT,
-        0
-      );
-    } else {
-      // Draw triangles normally
-      this.context.drawElements(
-        this.context.TRIANGLES,
-        this.geometry.attributes.index.values!.length,
-        this.context.UNSIGNED_SHORT,
-        0
-      );
+        // Use GL_LINES mode with the existing indices
+        // This will draw the edges of each triangle
+        this.context.drawElements(
+          this.context.LINES,
+          this.geometry.attributes.index.values.length,
+          this.context.UNSIGNED_SHORT,
+          0
+        );
+      } else {
+        // Draw triangles normally
+        this.context.drawElements(
+          this.context.TRIANGLES,
+          this.geometry.attributes.index.values.length,
+          this.context.UNSIGNED_SHORT,
+          0
+        );
+      }
     }
   }
 }

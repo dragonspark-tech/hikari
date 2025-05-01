@@ -37,9 +37,9 @@ export class PlaneGeometry {
     context: WebGLRenderingContext,
     width: number,
     height: number,
-    xSegments: number = 1,
-    ySegments: number = 1,
-    orientation: string = 'xz'
+    xSegments = 1,
+    ySegments = 1,
+    orientation = 'xz'
   ) {
     // Create attributes
     this.attributes = {
@@ -75,7 +75,7 @@ export class PlaneGeometry {
    * @param {number} [ySegments=1] - The number of segments along the Y-axis of the grid.
    * @return {void} This method does not return a value.
    */
-  setTopology(xSegments: number = 1, ySegments: number = 1): void {
+  setTopology(xSegments = 1, ySegments = 1): void {
     this.xSegCount = xSegments;
     this.ySegCount = ySegments;
 
@@ -94,26 +94,30 @@ export class PlaneGeometry {
         const vertexIndex = y * (this.xSegCount + 1) + x;
 
         // UV coordinates (0 to 1)
-        this.attributes.uv.values![2 * vertexIndex] = x / this.xSegCount;
-        this.attributes.uv.values![2 * vertexIndex + 1] = 1 - y / this.ySegCount;
+        if (this.attributes.uv.values) {
+          this.attributes.uv.values[2 * vertexIndex] = x / this.xSegCount;
+          this.attributes.uv.values[2 * vertexIndex + 1] = 1 - y / this.ySegCount;
+        }
 
         // Normalized UV coordinates (-1 to 1)
-        this.attributes.uvNorm.values![2 * vertexIndex] = (x / this.xSegCount) * 2 - 1;
-        this.attributes.uvNorm.values![2 * vertexIndex + 1] = 1 - (y / this.ySegCount) * 2;
+        if (this.attributes.uvNorm.values) {
+          this.attributes.uvNorm.values[2 * vertexIndex] = (x / this.xSegCount) * 2 - 1;
+          this.attributes.uvNorm.values[2 * vertexIndex + 1] = 1 - (y / this.ySegCount) * 2;
+        }
 
         // Generate indices for triangles
-        if (x < this.xSegCount && y < this.ySegCount) {
+        if (x < this.xSegCount && y < this.ySegCount && this.attributes.index.values) {
           const quadIndex = y * this.xSegCount + x;
 
           // First triangle
-          this.attributes.index.values![6 * quadIndex] = vertexIndex;
-          this.attributes.index.values![6 * quadIndex + 1] = vertexIndex + 1 + this.xSegCount;
-          this.attributes.index.values![6 * quadIndex + 2] = vertexIndex + 1;
+          this.attributes.index.values[6 * quadIndex] = vertexIndex;
+          this.attributes.index.values[6 * quadIndex + 1] = vertexIndex + 1 + this.xSegCount;
+          this.attributes.index.values[6 * quadIndex + 2] = vertexIndex + 1;
 
           // Second triangle
-          this.attributes.index.values![6 * quadIndex + 3] = vertexIndex + 1;
-          this.attributes.index.values![6 * quadIndex + 4] = vertexIndex + 1 + this.xSegCount;
-          this.attributes.index.values![6 * quadIndex + 5] = vertexIndex + 2 + this.xSegCount;
+          this.attributes.index.values[6 * quadIndex + 3] = vertexIndex + 1;
+          this.attributes.index.values[6 * quadIndex + 4] = vertexIndex + 1 + this.xSegCount;
+          this.attributes.index.values[6 * quadIndex + 5] = vertexIndex + 2 + this.xSegCount;
         }
       }
     }
@@ -134,7 +138,7 @@ export class PlaneGeometry {
    *                                      It must be a combination of two axes ('xy', 'xz', or 'yz').
    * @return {void} This method does not return a value.
    */
-  setSize(width: number = 1, height: number = 1, orientation: string = 'xz'): void {
+  setSize(width = 1, height = 1, orientation = 'xz'): void {
     this.width = width;
     this.height = height;
     this.orientation = orientation;
@@ -161,7 +165,7 @@ export class PlaneGeometry {
         const vertexIndex = y * (this.xSegCount + 1) + x;
 
         // Set position based on orientation
-        const posArray = this.attributes.position.values!;
+        const posArray = this.attributes.position.values;
         posArray[3 * vertexIndex + 'xyz'.indexOf(orientation[0])] = xPos;
         posArray[3 * vertexIndex + 'xyz'.indexOf(orientation[1])] = -yPos;
       }
