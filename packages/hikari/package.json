@@ -3,6 +3,7 @@
   "description": "A lightweight WebGL framework for creating and rendering 3D/2D graphics in the browser.",
   "version": "1.0.0",
   "license": "MIT",
+  "private": "false",
   "repository": {
     "type": "git",
     "url": "https://github.com/dragonspark-tech/hikari.git",
