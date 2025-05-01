@@ -1,10 +1,10 @@
 import { type CSSProperties, type ReactElement, useEffect, useRef, useState } from 'react';
 import {
-  MorphGradient as HikariMorphGradient,
+  MorphGradient,
   MorphGradientOptions
 } from '@dragonspark/hikari-effects';
 
-export type MorphGradientInitCallback = (gradient: HikariMorphGradient) => void;
+export type MorphGradientInitCallback = (gradient: MorphGradient) => void;
 
 export interface MorphGradientProps extends Omit<MorphGradientOptions, 'selector'> {
   className?: string;
@@ -35,7 +35,7 @@ export interface MorphGradientProps extends Omit<MorphGradientOptions, 'selector
  * - The component automatically cleans up the gradient instance when it is unmounted to avoid memory leaks.
  * - The gradient requires at least two colors: a base color and at least one wave color.
  */
-export const MorphGradient = ({
+export const MorphGradientCanvas = ({
   className,
   style,
   baseColor,
@@ -50,10 +50,11 @@ export const MorphGradient = ({
   wireframe,
   zoom,
   rotation,
-  density
+  density,
+  maxFrameTimeStep
 }: MorphGradientProps): ReactElement => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const gradientRef = useRef<HikariMorphGradient | null>(null);
+  const gradientRef = useRef<MorphGradient | null>(null);
   const [, setIsInitialized] = useState(false);
 
   useEffect(() => {
@@ -63,7 +64,7 @@ export const MorphGradient = ({
       canvasRef.current.id = canvasId;
 
       // Initialize the gradient
-      const gradient = new HikariMorphGradient({
+      const gradient = new MorphGradient({
         selector: `#${canvasId}`,
         baseColor,
         waveColors,
@@ -76,7 +77,8 @@ export const MorphGradient = ({
         wireframe,
         zoom,
         rotation,
-        density
+        density,
+        maxFrameTimeStep
       });
 
       // Store the gradient instance
@@ -99,8 +101,8 @@ export const MorphGradient = ({
       };
     }
 
-    return () => {};
-  }, [baseColor, waveColors, amplitude, seed, freqX, freqY, freqDelta, darkenTop, onInit, wireframe, zoom, rotation, density]);
+    return;
+  }, [baseColor, waveColors, amplitude, seed, freqX, freqY, freqDelta, darkenTop, onInit, wireframe, zoom, rotation, density, maxFrameTimeStep]);
 
   return (
     <canvas

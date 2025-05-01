@@ -1,6 +1,6 @@
 export {
-  MorphGradient,
+  MorphGradientCanvas,
   type MorphGradientProps,
   type MorphGradientInitCallback
-} from './MorphGradient';
+} from './MorphGradientCanvas';
 export { useMorphGradient, type UseMorphGradientOptions } from './useMorphGradient';
