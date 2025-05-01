@@ -1,3 +1,9 @@
+<p align="center">
+    <a href="#">
+        <img alt="Hikari" src="https://github.com/user-attachments/assets/f4f28187-e53e-4905-843f-1329ffe434db" width="100%" />
+    </a>
+</p>
+
 <h1 align="center">
   Hikari Graphics Library
 </h1>
