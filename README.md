@@ -25,6 +25,7 @@ Hikari is a collection of JavaScript libraries designed to simplify WebGL develo
 |---------|-------------|-----|
 | [@dragonspark/hikari](./packages/hikari) | Core WebGL framework for rendering 3D/2D graphics | [![npm version](https://img.shields.io/npm/v/@dragonspark/hikari.svg?style=for-the-badge)](https://www.npmjs.com/package/@dragonspark/hikari) |
 | [@dragonspark/hikari-effects](./packages/hikari-effects) | Ready-to-use visual effects built on top of hikari | [![npm version](https://img.shields.io/npm/v/@dragonspark/hikari-effects.svg?style=for-the-badge)](https://www.npmjs.com/package/@dragonspark/hikari-effects) |
+| [@dragonspark/hikari-react](./packages/hikari-react) | React components that implement the power of hikari-effects | [![npm version](https://img.shields.io/npm/v/@dragonspark/hikari-react.svg?style=for-the-badge)](https://www.npmjs.com/package/@dragonspark/hikari-react) |
 
 ## 🧩 Features
 
