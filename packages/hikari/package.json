@@ -1,6 +1,20 @@
 {
   "name": "@dragonspark/hikari",
+  "description": "A lightweight WebGL framework for creating and rendering 3D/2D graphics in the browser.",
   "version": "1.0.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dragonspark-tech/hikari.git",
+    "directory": "packages/hikari"
+  },
+  "bugs": "https://github.com/dragonspark-tech/hikari/issues",
+  "keywords": [
+    "dragonspark",
+    "hikari",
+    "webgl",
+    "rendering"
+  ],
   "type": "module",
   "main": "./dist/index.esm.js",
   "module": "./dist/index.esm.js",

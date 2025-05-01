@@ -1,6 +1,22 @@
 {
   "name": "@dragonspark/hikari-effects",
+  "description": "Ready-to-use visual effects built on top of the @dragonspark/hikari WebGL framework.",
   "version": "1.0.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dragonspark-tech/hikari.git",
+    "directory": "packages/hikari-effects"
+  },
+  "bugs": "https://github.com/dragonspark-tech/hikari/issues",
+  "keywords": [
+    "dragonspark",
+    "hikari",
+    "webgl",
+    "rendering",
+    "gradients",
+    "animation"
+  ],
   "type": "module",
   "main": "./dist/index.esm.js",
   "module": "./dist/index.esm.js",

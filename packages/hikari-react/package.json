@@ -1,6 +1,24 @@
 {
   "name": "@dragonspark/hikari-react",
+  "description": "React components and hooks for the @dragonspark/hikari WebGL framework.",
   "version": "1.0.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dragonspark-tech/hikari.git",
+    "directory": "packages/hikari-react"
+  },
+  "bugs": "https://github.com/dragonspark-tech/hikari/issues",
+  "keywords": [
+    "dragonspark",
+    "hikari",
+    "webgl",
+    "rendering",
+    "gradients",
+    "animation",
+    "react",
+    "components"
+  ],
   "type": "module",
   "main": "./dist/index.esm.js",
   "module": "./dist/index.esm.js",
@@ -19,8 +37,8 @@
     "!**/*.tsbuildinfo"
   ],
   "peerDependencies": {
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react": "^16.8.6 || ^17.0.1 || ^18.2.0 || ^19.0.0",
+    "react-dom": "^16.8.6 || ^17.0.1 || ^18.2.0 || ^19.0.0"
   },
   "dependencies": {
     "@dragonspark/hikari": "workspace:*",
