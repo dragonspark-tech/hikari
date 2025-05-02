@@ -1,16 +1,18 @@
+
 /**
- * GLSL vertex shader code stored as a template literal string.
- * This shader applies per-pixel color manipulation to render an object with specific visual effects.
+ * A GLSL fragment shader string used for rendering graphics effects.
  *
- * It includes the following functionality:
- * - Uses `v_color` as the primary varying color for rendering.
- * - Allows optional darkening of the top portion of the object if the `u_darken_top` uniform is set to 1.0.
- * - Darkening is influenced by the fragment's position within the screen space (`gl_FragCoord.xy`)
- *   and a user-defined `u_shadow_power` uniform.
+ * This fragment shader manipulates the color output based on input variables and conditions.
+ * It dynamically adjusts colors using a mixing factor, resolution of the canvas,
+ * application-specific parameters, and intensity calculation derived from a combination of
+ * screen coordinates and sinusoidal functions.
  *
- * Shader uniforms expected:
- * - `u_darken_top` (float): Indicates whether to apply darkening to the top (1.0 to enable, 0.0 to disable).
- * - `u_shadow_power` (float): Controls the intensity of the shadowing effect.
- * - `resolution` (vec2): The resolution of the viewport in pixels (width and height).
+ * Variables used in the shader:
+ * - varying vec3 v_color: Input vertex color passed from the vertex shader.
+ * - uniform vec2 resolution: The resolution of the rendering surface.
+ * - uniform float u_apply_color_mix: A switch controlling whether the color mix effect is applied.
+ * - uniform float u_color_mix_power: The exponent to tweak intensity during color manipulation.
+ * - uniform vec3 u_color_mix_values: Defines the color adjustments applied during the mix.
  */
-export const fragmentShader = `varying vec3 v_color;void main(){vec3 color=v_color;if(u_darken_top==1.0){vec2 st=gl_FragCoord.xy/resolution.xy;color.g-=pow(st.y+sin(-12.0)*st.x,u_shadow_power)*0.4;}gl_FragColor=vec4(color,1.0);}`;
+export const fragmentShader = `varying vec3 v_color;void main(){vec3 color=v_color;if(u_apply_color_mix==1.0){vec2 st=gl_FragCoord.xy/resolution;float intensity=pow(st.y+sin(-12.0)*st.x,u_color_mix_power);color-=u_color_mix_values*intensity;}gl_FragColor=vec4(color,1.0);}`;
+

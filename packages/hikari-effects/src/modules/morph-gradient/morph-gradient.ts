@@ -3,13 +3,34 @@ import { fragmentShader } from '../../shaders/fragment';
 import { noiseShader } from '../../shaders/noise';
 import { blendShader } from '../../shaders/blend';
 import { normalizeColor } from '../../utils/colors';
-import { HikariGL, Mesh, Material, PlaneGeometry, Uniform } from '@dragonspark/hikari';
+import {
+  HikariGL,
+  Material,
+  Mesh,
+  PlaneGeometry,
+  Uniform,
+  type UniformType
+} from '@dragonspark/hikari';
 
 interface ShaderFiles {
   vertex: string;
   fragment: string;
   noise: string;
   blend: string;
+}
+
+interface MorphGradientUniforms {
+  u_time: Uniform<'float'>;
+  u_apply_color_mix: Uniform<'int'>;
+  u_color_mix_power: Uniform<'float'>;
+  u_color_mix_values: Uniform<'vec3'>;
+  u_active_colors: Uniform<'vec4'>;
+  u_global: Uniform<'struct'>;
+  u_vertDeform: Uniform<'struct'>;
+  u_baseColor: Uniform<'vec3'>;
+  u_waveLayers: Uniform<'array'>;
+
+  [key: string]: Uniform<UniformType>;
 }
 
 export interface MorphGradientConfig {
@@ -30,17 +51,20 @@ export interface MorphGradientOptions {
   freqX?: number;
   freqY?: number;
   freqDelta?: number;
-  darkenTop?: boolean;
+  applyColorMix?: boolean;
+  colorMixPower?: number;
+  colorMixValues?: [number, number, number];
   wireframe?: boolean;
   zoom?: number;
   rotation?: number;
   density?: [number, number];
   maxFrameTimeStep?: number;
+  debug?: boolean;
 }
 
 export class MorphGradient {
   // DOM element
-  el: HTMLCanvasElement | null = null;
+  canvasElement: HTMLCanvasElement | null = null;
 
   // CSS variable handling
   cssVarRetries = 0;
@@ -71,7 +95,7 @@ export class MorphGradient {
   conf: MorphGradientConfig;
 
   // Uniforms for WebGL
-  uniforms: Record<string, Uniform> = {};
+  uniforms: MorphGradientUniforms | undefined;
 
   // Animation properties
   t = 1253106;
@@ -99,10 +123,17 @@ export class MorphGradient {
   freqX = 14e-5;
   freqY = 29e-5;
   freqDelta = 1e-5;
-  darkenTop?: boolean = true;
+
+  // Color Mix
+  applyColorMix = true;
+  colorMixPower = 5;
+  colorMixValues: [number, number, number] = [0, 0.4, 0];
 
   // Active colors
   activeColors: number[] = [1, 1, 1, 1];
+
+  // Debug
+  debug = false;
 
   /**
    * Constructor for initializing a MorphGradient instance with optional configuration options.
@@ -145,7 +176,6 @@ export class MorphGradient {
       if (options.freqX !== undefined) this.freqX = options.freqX;
       if (options.freqY !== undefined) this.freqY = options.freqY;
       if (options.freqDelta !== undefined) this.freqDelta = options.freqDelta;
-      if (options.darkenTop !== undefined) this.darkenTop = options.darkenTop;
       if (options.maxFrameTimeStep !== undefined) this.maxFrameTimeStep = options.maxFrameTimeStep;
 
       // Handle color options
@@ -157,10 +187,18 @@ export class MorphGradient {
       if (options.zoom !== undefined) this.conf.zoom = options.zoom;
       if (options.rotation !== undefined) this.conf.rotation = options.rotation;
       if (options.density !== undefined) this.conf.density = options.density;
+      if (options.debug !== undefined) this.debug = options.debug;
+
+      // Apply color mix options
+      if (options.applyColorMix !== undefined) this.applyColorMix = options.applyColorMix;
+      if (options.colorMixPower !== undefined) this.colorMixPower = options.colorMixPower;
+      if (options.colorMixValues !== undefined) this.colorMixValues = options.colorMixValues;
 
       // Initialize gradient if the selector is provided
       if (options.selector) {
-        this.initGradient(options.selector);
+        this.initGradient(options.selector).then((r) =>
+          this.debug ? console.log('MorphGradient initialized', r) : () => void 0
+        );
       }
     }
   }
@@ -217,7 +255,7 @@ export class MorphGradient {
     this.mesh.geometry.setTopology(this.xSegCount, this.ySegCount);
     this.mesh.geometry.setSize(this.width, this.height);
 
-    this.mesh.material.uniforms.u_shadow_power.value = this.width < 600 ? 5 : 6;
+    this.mesh.material.uniforms.u_color_mix_power.value = this.width < 600 ? 5 : 6;
     this.mesh.wireframe = this.conf.wireframe;
   };
 
@@ -256,7 +294,7 @@ export class MorphGradient {
 
     // Apply rotation by modifying the matrix
     if (this.conf.rotation !== 0) {
-      const rotationRad = this.conf.rotation * Math.PI / 180; // Convert degrees to radians
+      const rotationRad = (this.conf.rotation * Math.PI) / 180; // Convert degrees to radians
       const cosTheta = Math.cos(rotationRad);
       const sinTheta = Math.sin(rotationRad);
 
@@ -321,7 +359,10 @@ export class MorphGradient {
     const delta = timestamp - this.last;
 
     // advance the time uniform by the full delta or time clamp
-    this.t += this.maxFrameTimeStep === 0 ? delta : Math.min(timestamp - this.last, 1000 / this.maxFrameTimeStep);
+    this.t +=
+      this.maxFrameTimeStep === 0
+        ? delta
+        : Math.min(timestamp - this.last, 1000 / this.maxFrameTimeStep);
     this.last = timestamp;
 
     // update shader and render
@@ -360,15 +401,15 @@ export class MorphGradient {
    * @returns {void}
    */
   addIsLoadedClass = (): void => {
-    if (!this.el) return;
+    if (!this.canvasElement) return;
 
     if (!this.isLoadedClass) {
       this.isLoadedClass = true;
-      this.el.classList.add('isLoaded');
+      this.canvasElement.classList.add('isLoaded');
 
       setTimeout(() => {
-        if (this.el && this.el.parentElement) {
-          this.el.parentElement.classList.add('isLoaded');
+        if (this.canvasElement && this.canvasElement.parentElement) {
+          this.canvasElement.parentElement.classList.add('isLoaded');
         }
       }, 3000);
     }
@@ -407,8 +448,8 @@ export class MorphGradient {
    * @returns {Promise<MorphGradient>} A promise that resolves to the current instance of the MorphGradient.
    */
   initGradient = async (selector: string): Promise<MorphGradient> => {
-    this.el = document.querySelector(selector) as HTMLCanvasElement;
-    if (this.el) {
+    this.canvasElement = document.querySelector(selector) as HTMLCanvasElement;
+    if (this.canvasElement) {
       await this.connect();
     }
     return this;
@@ -423,7 +464,7 @@ export class MorphGradient {
    * @return {Promise<void>} A promise indicating the completion of the connection initialization process.
    */
   async connect(): Promise<void> {
-    if (!this.el) return;
+    if (!this.canvasElement) return;
 
     // Check if canvas exists
     if (document.querySelectorAll('canvas').length < 1) {
@@ -433,15 +474,15 @@ export class MorphGradient {
 
     // Initialize MiniGl
     this.hikari = new HikariGL({
-      canvas: this.el,
-      debug: false
+      canvas: this.canvasElement,
+      debug: this.debug
     });
 
     // Get computed style
     requestAnimationFrame(() => {
-      if (!this.el) return;
+      if (!this.canvasElement) return;
 
-      this.computedCanvasStyle = getComputedStyle(this.el);
+      this.computedCanvasStyle = getComputedStyle(this.canvasElement);
       this.waitForCssVars();
     });
 
@@ -453,7 +494,7 @@ export class MorphGradient {
 
   /**
    * Disconnects event listeners and updates the status of the instance.
-   * The method removes the scroll and resize event listeners from the window,
+   * The method removes the 'scroll' and 'resize' event listeners from the window,
    * sets the intersection state to false, and updates the playing configuration.
    */
   disconnect() {
@@ -614,11 +655,16 @@ export class MorphGradient {
       u_time: this.hikari.createUniform({
         value: 0
       }),
-      u_shadow_power: this.hikari.createUniform({
-        value: 5
+      u_apply_color_mix: this.hikari.createUniform({
+        value: this.applyColorMix ? 1 : 0
       }),
-      u_darken_top: this.hikari.createUniform({
-        value: this.darkenTop ? 1 : 0
+      u_color_mix_power: this.hikari.createUniform({
+        value: this.colorMixPower,
+        type: 'float'
+      }),
+      u_color_mix_values: this.hikari.createUniform({
+        value: this.colorMixValues,
+        type: 'vec3'
       }),
       u_active_colors: this.hikari.createUniform({
         value: this.activeColors,
@@ -680,6 +726,8 @@ export class MorphGradient {
     };
 
     // Add wave layers
+    if (!this.uniforms?.u_waveLayers) return null;
+
     for (let i = 1; i < this.sectionColors.length; i++) {
       this.uniforms.u_waveLayers.value.push(
         this.hikari.createUniform({
@@ -730,13 +778,15 @@ export class MorphGradient {
     if (!this.hikari) return;
 
     this.material = this.initMaterial();
+    if (!this.material) return;
+
     this.geometry = this.hikari.createPlaneGeometry(
       this.width,
       this.height,
       this.xSegCount,
       this.ySegCount
     );
-    this.mesh = this.hikari.createMesh(this.geometry, this.material!);
+    this.mesh = this.hikari.createMesh(this.geometry, this.material);
     this.mesh.wireframe = this.conf.wireframe;
   }
 
