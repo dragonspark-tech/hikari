@@ -1,10 +1,43 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { HikariGL } from '../';
-import { Attribute } from '../core/attribute';
-import { Material } from '../core/material';
-import { PlaneGeometry } from '../core/plane-geometry';
-import { Uniform } from '../core/uniform';
-import { mockWebGLContext } from './mocks/mock-webglcontext';
+import { AttributeOptions, HikariGL, UniformOptions } from '../';
+import { Attribute, Material, PlaneGeometry, Uniform } from '../core';
+
+const mockWebGLContext = {
+  viewport: vi.fn(),
+  clearColor: vi.fn(),
+  clearDepth: vi.fn(),
+  createBuffer: vi.fn(() => ({})),
+  createProgram: vi.fn(() => ({})),
+  createShader: vi.fn(() => ({})),
+  shaderSource: vi.fn(),
+  compileShader: vi.fn(),
+  attachShader: vi.fn(),
+  linkProgram: vi.fn(),
+  getProgramParameter: vi.fn(() => true),
+  getProgramInfoLog: vi.fn(() => ''),
+  getShaderParameter: vi.fn(() => true),
+  getShaderInfoLog: vi.fn(() => ''),
+  useProgram: vi.fn(),
+  getUniformLocation: vi.fn(() => ({})),
+  getAttribLocation: vi.fn(() => 0),
+  enableVertexAttribArray: vi.fn(),
+  vertexAttribPointer: vi.fn(),
+  bindBuffer: vi.fn(),
+  bufferData: vi.fn(),
+  drawElements: vi.fn(),
+  lineWidth: vi.fn(),
+  ARRAY_BUFFER: 34962,
+  ELEMENT_ARRAY_BUFFER: 34963,
+  STATIC_DRAW: 35044,
+  FLOAT: 5126,
+  UNSIGNED_SHORT: 5123,
+  TRIANGLES: 4,
+  LINES: 1,
+  VERTEX_SHADER: 35633,
+  FRAGMENT_SHADER: 35632,
+  LINK_STATUS: 35714,
+  COMPILE_STATUS: 35713
+};
 
 // Mock document and canvas
 global.document = {
@@ -43,8 +76,8 @@ describe('HikariGL', () => {
     });
 
     it('should set size if width and height are provided', () => {
-      // Create a mock implementation that doesn't actually call the method
-      const setSize = vi.spyOn(HikariGL.prototype, 'setSize').mockImplementation(() => {});
+      // Create a mock implementation that doesn't call the method
+      const setSize = vi.spyOn(HikariGL.prototype, 'setSize').mockImplementation(() => void 0);
       new HikariGL({ canvas, width: 800, height: 600 });
       expect(setSize).toHaveBeenCalledWith(800, 600);
 
@@ -61,7 +94,7 @@ describe('HikariGL', () => {
         writable: true
       });
 
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => void 0);
       const hikariDebug = new HikariGL({ canvas, debug: true });
 
       hikariDebug.debug('Test message');
@@ -85,14 +118,14 @@ describe('HikariGL', () => {
       const mockDate = vi.fn(() => new originalDate('2023-01-01T12:00:00Z'));
       global.Date = mockDate as any;
 
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => void 0);
       const hikariDebug = new HikariGL({ canvas, debug: true });
 
       // First debug message
       hikariDebug.debug('First message');
       expect(consoleSpy).toHaveBeenCalled();
 
-      // Change mock date to be 1001ms later
+      // Change the mock date to be 1001 ms later
       mockDate.mockImplementation(() => new originalDate('2023-01-01T12:00:01.001Z'));
 
       // Second debug message (should trigger separator)
@@ -135,28 +168,30 @@ describe('HikariGL', () => {
       hikari.width = 800;
       hikari.height = 600;
       hikari.setOrthographicCamera();
-      expect(hikari.commonUniforms.projectionMatrix.value).toBeDefined();
-      expect(hikari.commonUniforms.projectionMatrix.value.length).toBe(16);
+
+      const projectionMatrix = hikari.commonUniforms.projectionMatrix as Uniform<'mat4'>;
+      expect(projectionMatrix.value).toBeDefined();
+      expect(projectionMatrix.value.length).toBe(16);
     });
 
     it('should use default values if not provided', () => {
       hikari.width = 800;
       hikari.height = 600;
       hikari.setOrthographicCamera();
-      const matrix = hikari.commonUniforms.projectionMatrix.value;
-      expect(matrix[12]).toBe(0); // x
-      expect(matrix[13]).toBe(0); // y
-      expect(matrix[14]).toBe(0); // z
+      const projectionMatrix = hikari.commonUniforms.projectionMatrix as Uniform<'mat4'>;
+      expect(projectionMatrix.value[12]).toBe(0); // x
+      expect(projectionMatrix.value[13]).toBe(0); // y
+      expect(projectionMatrix.value[14]).toBe(0); // z
     });
 
     it('should use provided values', () => {
       hikari.width = 800;
       hikari.height = 600;
       hikari.setOrthographicCamera(10, 20, 30, -1000, 1000);
-      const matrix = hikari.commonUniforms.projectionMatrix.value;
-      expect(matrix[12]).toBe(10); // x
-      expect(matrix[13]).toBe(20); // y
-      expect(matrix[14]).toBe(30); // z
+      const projectionMatrix = hikari.commonUniforms.projectionMatrix as Uniform<'mat4'>;
+      expect(projectionMatrix.value[12]).toBe(10); // x
+      expect(projectionMatrix.value[13]).toBe(20); // y
+      expect(projectionMatrix.value[14]).toBe(30); // z
     });
   });
 
@@ -173,7 +208,7 @@ describe('HikariGL', () => {
 
   describe('createAttribute', () => {
     it('should create and return an Attribute instance', () => {
-      const options = { target: 'ARRAY_BUFFER', size: 3 };
+      const options: AttributeOptions = { target: 1, size: 3 };
       const attribute = hikari.createAttribute(options);
       expect(attribute).toBeInstanceOf(Attribute);
     });
@@ -181,7 +216,7 @@ describe('HikariGL', () => {
 
   describe('createUniform', () => {
     it('should create and return a Uniform instance', () => {
-      const options = { type: 'float', value: 1.0 };
+      const options: UniformOptions = { type: 'float', value: 1.0 };
       const uniform = hikari.createUniform(options);
       expect(uniform).toBeInstanceOf(Uniform);
       expect(uniform.type).toBe('float');
@@ -220,9 +255,9 @@ describe('HikariGL', () => {
 
   describe('createMesh', () => {
     it('should create a Mesh instance and add it to meshes array', () => {
-      const geometry = new PlaneGeometry(mockWebGLContext as unknown as WebGLRenderingContext, 10, 10);
+      const geometry = new PlaneGeometry(mockWebGLContext as unknown as WebGL2RenderingContext, 10, 10);
       const material = new Material(
-        mockWebGLContext as unknown as WebGLRenderingContext,
+        mockWebGLContext as unknown as WebGL2RenderingContext,
         'void main() { gl_Position = vec4(0.0, 0.0, 0.0, 1.0); }',
         'void main() { gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0); }',
         {},

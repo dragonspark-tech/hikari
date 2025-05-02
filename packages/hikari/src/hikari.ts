@@ -1,4 +1,14 @@
-import { Attribute, Material, Mesh, PlaneGeometry, Uniform } from './core';
+// hikari.ts
+import {
+  Attribute,
+  AttributeOptions,
+  Material,
+  Mesh,
+  PlaneGeometry,
+  Uniform,
+  UniformOptions,
+  UniformType
+} from './core';
 
 export interface HikariGLOptions {
   canvas: HTMLCanvasElement;
@@ -9,233 +19,175 @@ export interface HikariGLOptions {
 
 /**
  * HikariGL is a WebGL helper class designed to ease the management of WebGL contexts,
- * rendering pipelines, and common geometries and materials. It provides utility functions
- * to set camera projections, manage canvas size, and create various WebGL components.
+ * rendering pipelines, and common geometries and materials.
  */
 export class HikariGL {
   canvas: HTMLCanvasElement;
-  gl: WebGLRenderingContext;
+  gl: WebGL2RenderingContext;
   meshes: Mesh[] = [];
   width!: number;
   height!: number;
-  debug: (message: string, ...args: any[]) => void;
-  commonUniforms: Record<string, Uniform>;
+  debug: (message: string, ...args: (string | object)[]) => void;
+  commonUniforms: Record<string, Uniform<UniformType>>;
+
   private lastDebugMsg?: Date;
 
   /**
-   * Constructs a new instance of the object with specified options.
+   * Constructs a new instance of the class with the provided options.
    *
-   * @param {HikariGLOptions} options - The configuration object for the constructor.
-   * @param {HTMLCanvasElement} options.canvas - The HTML canvas element to render WebGL content on.
-   * @param {number} [options.width] - The initial width of the canvas (optional).
-   * @param {number} [options.height] - The initial height of the canvas (optional).
-   * @param {boolean} [options.debug=false] - Enables WebGL debugging mode if set to true (optional).
-   * @return {void}
+   * @param options - The initialization options for the class.
+   * @param options.canvas - The canvas element used for WebGL rendering.
+   * @param [options.width] - The width to set for the rendering context (optional).
+   * @param [options.height] - The height to set for the rendering context (optional).
+   * @param [options.debug=false] - Whether to enable debug mode (optional).
    */
   constructor(options: HikariGLOptions) {
     const { canvas, width, height, debug = false } = options;
-
-    // Store canvas and get WebGL context
     this.canvas = canvas;
-    this.gl = this.canvas.getContext('webgl', { antialias: true }) as WebGLRenderingContext;
+    this.gl = canvas.getContext('webgl', { antialias: true }) as WebGL2RenderingContext;
 
-    // Set initial size if provided
-    if (width && height) {
-      this.setSize(width, height);
-    }
+    if (width && height) this.setSize(width, height);
 
-    // Set up debug function
-    const debugOutput = document.location.search.toLowerCase().indexOf('debug=webgl') !== -1;
     this.debug =
-      debug && debugOutput
-        ? (message: string, ...args: any[]) => {
+      debug
+        ? (msg, ...args) => {
             const now = new Date();
-            if (!this.lastDebugMsg || now.getTime() - this.lastDebugMsg.getTime() > 1000) {
+            if (!this.lastDebugMsg || now.getTime() - this.lastDebugMsg.getTime() > 1000)
               console.log('---');
-            }
-
-            console.log(
-              now.toLocaleTimeString() +
-                Array(Math.max(0, 32 - message.length)).join(' ') +
-                message +
-                ': ',
-              ...args
-            );
-
+            console.log(now.toLocaleTimeString(), msg, ...args);
             this.lastDebugMsg = now;
           }
-        : () => {};
+        : () => void 0;
 
-    // Initialize common uniforms
-    const identityMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+    const I4 = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+
     this.commonUniforms = {
-      projectionMatrix: new Uniform({
-        type: 'mat4',
-        value: identityMatrix
-      }),
-      modelViewMatrix: new Uniform({
-        type: 'mat4',
-        value: identityMatrix
-      }),
-      resolution: new Uniform({
-        type: 'vec2',
-        value: [1, 1]
-      }),
-      aspectRatio: new Uniform({
-        type: 'float',
-        value: 1
-      })
+      projectionMatrix: new Uniform({ type: 'mat4', value: I4 }),
+      modelViewMatrix: new Uniform({ type: 'mat4', value: I4 }),
+      resolution: new Uniform({ type: 'vec2', value: [1, 1] }),
+      aspectRatio: new Uniform({ type: 'float', value: 1 })
     };
   }
 
   /**
-   * Sets the size of the canvas and updates related properties including WebGL viewport, uniforms, and debug information.
+   * Sets the size of the canvas and updates the relevant properties and uniforms.
    *
-   * @param {number} [width=640] - The new width of the canvas. Defaults to 640 if not provided.
-   * @param {number} [height=480] - The new height of the canvas. Defaults to 480 if not provided.
-   * @return {void} This method does not return any value.
+   * @param [width=640] - The desired width of the canvas.
+   * @param [height=480] - The desired height of the canvas.
    */
-  setSize(width: number = 640, height: number = 480): void {
+  setSize(width = 640, height = 480): void {
     this.width = width;
     this.height = height;
-
-    // Update canvas size
     this.canvas.width = width;
     this.canvas.height = height;
-
-    // Update WebGL viewport
     this.gl.viewport(0, 0, width, height);
 
-    // Update uniforms
     this.commonUniforms.resolution.value = [width, height];
     this.commonUniforms.aspectRatio.value = width / height;
 
-    // Log debug info
     this.debug('HikariGL.setSize', { width, height });
   }
 
   /**
-   * Sets the orthographic camera projection for the 3D rendering context.
-   * This method establishes the projection matrix based on the provided position and near/far plane distances.
+   * Configures the projection matrix for an orthographic camera.
    *
-   * @param {number} [x=0] The x-coordinate of the orthographic camera's position.
-   * @param {number} [y=0] The y-coordinate of the orthographic camera's position.
-   * @param {number} [z=0] The z-coordinate of the orthographic camera's position.
-   * @param {number} [near=-2000] The near clipping plane distance.
-   * @param {number} [far=2000] The far clipping plane distance.
-   * @return {void} No value is returned.
+   * @param [x=0] The x-coordinate for the camera position.
+   * @param [y=0] The y-coordinate for the camera position.
+   * @param [z=0] The z-coordinate for the camera position.
+   * @param [near=-2000] The near clipping plane distance.
+   * @param [far=2000] The far clipping plane distance.
    */
-  setOrthographicCamera(
-    x: number = 0,
-    y: number = 0,
-    z: number = 0,
-    near: number = -2000,
-    far: number = 2000
-  ): void {
-    // Create orthographic projection matrix
+  setOrthographicCamera(x = 0, y = 0, z = 0, near = -2000, far = 2000): void {
+    // prettier-ignore
     this.commonUniforms.projectionMatrix.value = [
-      2 / this.width,
-      0,
-      0,
-      0,
-      0,
-      2 / this.height,
-      0,
-      0,
-      0,
-      0,
-      2 / (near - far),
-      0,
-      x,
-      y,
-      z,
+      2 / this.width, 0, 0, 0, 0,
+      2 / this.height, 0, 0, 0, 0,
+      2 / (near - far), 0, x, y, z,
       1
     ];
-
-    // Log debug info
     this.debug('setOrthographicCamera', this.commonUniforms.projectionMatrix.value);
   }
 
   /**
-   * Renders the current frame to the canvas by clearing the background and drawing all available meshes.
-   *
-   * @return {void} This method does not return a value.
+   * Renders objects to the context by clearing the canvas and invoking the draw method
+   * for each mesh in the collection.
    */
   render(): void {
-    // Clear the canvas
     this.gl.clearColor(0, 0, 0, 0);
     this.gl.clearDepth(1);
-
-    // Draw all meshes
-    this.meshes.forEach((mesh) => mesh.draw());
+    this.meshes.forEach((m) => m.draw());
   }
 
   /**
-   * Creates a new attribute based on the provided options.
+   * Creates and returns a new attribute instance based on the provided options.
    *
-   * @param {any} options - The configuration options for creating the attribute.
-   * @return {Attribute} The newly created attribute instance.
+   * @param {AttributeOptions} options - The configuration options for the attribute,
+   *                                     including settings like data type and size.
+   * @return The newly created attribute instance.
    */
-  createAttribute(options: any): Attribute {
+  createAttribute(options: AttributeOptions): Attribute {
     return new Attribute(this.gl, options);
   }
 
   /**
-   * Creates and returns a new Uniform instance using the provided options.
+   * Creates a new uniform instance with the specified options.
    *
-   * @param {any} options - Configuration options for creating the Uniform instance.
-   * @return {Uniform} A new instance of the Uniform class based on the provided options.
+   * @template T
+   * @param {UniformOptions<T>} options - The options for configuring the uniform instance.
+   * @return The created uniform instance.
    */
-  createUniform(options: any): Uniform {
+  createUniform<T extends UniformType>(options: UniformOptions<T>): Uniform<T> {
     return new Uniform(options);
   }
 
   /**
-   * Creates and returns a material instance by compiling the provided vertex and fragment shaders, and applying uniforms.
+   * Creates and returns a new Material instance
+   * using the provided vertex and fragment shaders along with optional uniforms.
    *
-   * @param {string} vertexShaders - The source code of the vertex shader to be compiled.
-   * @param {string} fragmentShaders - The source code of the fragment shader to be compiled.
-   * @param {Record<string, Uniform>} [uniforms={}] - An optional record of uniform variable mappings to be applied to the material.
-   * @return {Material} The created material instance.
+   * @param vertexShaders - The GLSL code for the vertex shader.
+   * @param fragmentShaders - The GLSL code for the fragment shader.
+   * @param [uniforms={}] - An optional set of uniform values for the shader program.
+   * @return The created Material instance.
    */
   createMaterial(
     vertexShaders: string,
     fragmentShaders: string,
-    uniforms: Record<string, Uniform> = {}
+    uniforms: Record<string, Uniform<UniformType>> = {}
   ): Material {
     return new Material(this.gl, vertexShaders, fragmentShaders, uniforms, this.commonUniforms);
   }
 
   /**
-   * Creates a plane geometry with specified dimensions, segment divisions, and orientation.
+   * Creates a plane geometry object with specified dimensions, segments, and orientation.
    *
-   * @param {number} width - The width of the plane.
-   * @param {number} height - The height of the plane.
-   * @param {number} [xSegments=1] - The number of horizontal segments.
-   * @param {number} [ySegments=1] - The number of vertical segments.
-   * @param {string} [orientation='xz'] - The orientation of the plane (e.g., 'xz', 'xy', 'yz').
-   * @return {PlaneGeometry} A new PlaneGeometry object.
+   * @param width - The width of the plane.
+   * @param height - The height of the plane.
+   * @param [xSeg=1] - The number of width segments, default is 1.
+   * @param [ySeg=1] - The number of height segments, default is 1.
+   * @param [orient='xz'] - The orientation of the plane, default is 'xz'.
+   * @return The created PlaneGeometry object.
    */
   createPlaneGeometry(
     width: number,
     height: number,
-    xSegments: number = 1,
-    ySegments: number = 1,
-    orientation: string = 'xz'
+    xSeg = 1,
+    ySeg = 1,
+    orient: 'xz' | 'xy' | 'yz' = 'xz'
   ): PlaneGeometry {
-    return new PlaneGeometry(this.gl, width, height, xSegments, ySegments, orientation);
+    return new PlaneGeometry(this.gl, width, height, xSeg, ySeg, orient);
   }
 
   /**
-   * Creates a new mesh using the given geometry and material, stores it, and returns the created mesh.
+   * Creates a new mesh with the provided geometry and material,
+   * adds it to the internal mesh collection, and returns the created mesh.
    *
-   * @param {PlaneGeometry} geometry - The geometry to define the shape of the mesh.
-   * @param {Material} material - The material to define the appearance of the mesh.
-   * @return {Mesh} The created mesh instance.
+   * @param geometry - The geometry object defining the shape of the mesh.
+   * @param material - The material object defining the appearance of the mesh.
+   * @return The created mesh object.
    */
   createMesh(geometry: PlaneGeometry, material: Material): Mesh {
-    const mesh = new Mesh(this.gl, geometry, material);
-    this.meshes.push(mesh);
-    return mesh;
+    const m = new Mesh(this.gl, geometry, material);
+    this.meshes.push(m);
+    return m;
   }
 }

@@ -1,101 +1,125 @@
-interface UniformOptions {
-  type: string;
-  value: any;
+/**
+ * An object that maps uniform types to their corresponding WebGL uniform function suffixes.
+ *
+ * The keys of the object represent different GLSL uniform variable types,
+ * and the values are strings indicating the suffix used in WebGL's uniform functions.
+ *
+ * This mapping is helpful when dynamically determining the correct WebGL function
+ * to call based on a uniform's type.
+ *
+ * @constant
+ * @property float - Represents a float uniform type, mapped to '1f'.
+ * @property int - Represents an int uniform type, mapped to '1i'.
+ * @property vec2 - Represents a vec2 uniform type, mapped to '2fv'.
+ * @property vec3 - Represents a vec3 uniform type, mapped to '3fv'.
+ * @property vec4 - Represents a vec4 uniform type, mapped to '4fv'.
+ * @property mat4 - Represents a mat4 uniform type, mapped to 'Matrix4fv'.
+ */
+export const uniformTypeFns = {
+  float: '1f',
+  int: '1i',
+  vec2: '2fv',
+  vec3: '3fv',
+  vec4: '4fv',
+  mat4: 'Matrix4fv',
+  struct: 'struct'
+} as const;
+
+export type BasicUniformType = keyof typeof uniformTypeFns;
+export type UniformType = BasicUniformType | 'array' | 'struct';
+
+export type UniformValue<T extends UniformType> =
+  T extends 'float' | 'int'
+    ? number
+    : // vectors can be number[] or fixed-length tuples
+    T extends 'vec2'
+    ? [number, number] | number[]
+    : T extends 'vec3'
+    ? [number, number, number] | number[]
+    : T extends 'vec4'
+    ? [number, number, number, number] | number[]
+    : // mat4 is usually a Float32Array or number[]
+    T extends 'mat4'
+    ? Float32Array | number[]
+    : // array of uniforms
+    T extends 'array'
+    ? Uniform<BasicUniformType>[]
+    : // struct is a dict of sub-Uniforms
+    T extends 'struct'
+    ? Record<string, Uniform<BasicUniformType>>
+    : // otherwise never
+      never;
+
+export interface UniformOptions<T extends UniformType = 'float'> {
+  type?: T; // defaulted below
+  value: UniformValue<T>;
   excludeFrom?: string;
   transpose?: boolean;
 }
 
 /**
- * Represents a uniform variable in a WebGL shader.
- * Provides configuration details for both properties and methods to handle uniforms, including updating values and generating GLSL declarations.
+ * A class representing a WebGL uniform, which contains metadata and operations for managing uniform
+ * variables in WebGL shaders, including their type, value, and other attributes.
+ *
+ * @template T
+ * @extends {UniformType}
  */
-export class Uniform {
-  type: string;
-  value: any;
-  excludeFrom?: string;
-  transpose: boolean = false;
-  typeFn: string;
+export class Uniform<T extends UniformType = 'float'> {
+  readonly type: T;
+  value: UniformValue<T>;
+  readonly excludeFrom?: string;
+  readonly transpose: boolean;
+  readonly typeFn: string;
 
-  /**
-   * Constructs a new instance of the class with specified options.
-   *
-   * @param {UniformOptions} options - The configuration options for the instance.
-   * @return {void} Initializes the instance with the given options and determines the appropriate uniform function name based on the type.
-   */
-  constructor(options: UniformOptions) {
-    this.type = 'float';
-
-    // Apply options
-    Object.assign(this, options);
-
-    // Set the appropriate uniform function name based on type
-    this.typeFn =
-      {
-        float: '1f',
-        int: '1i',
-        vec2: '2fv',
-        vec3: '3fv',
-        vec4: '4fv',
-        mat4: 'Matrix4fv'
-      }[this.type] || '1f';
+  constructor({ type = 'float' as T, value, excludeFrom, transpose = false }: UniformOptions<T>) {
+    this.type = type;
+    this.value = value;
+    this.excludeFrom = excludeFrom;
+    this.transpose = transpose;
+    this.typeFn = uniformTypeFns[type as BasicUniformType] ?? '1f';
   }
 
-  /**
-   * Updates a WebGL uniform variable with the stored value and type information.
-   *
-   * @param {WebGLUniformLocation} [location] The location of the uniform variable in the shader program.
-   * @param {WebGLRenderingContext} [gl] The WebGL rendering context to perform the operation.
-   * @return {void} Does not return a value.
-   */
-  update(location?: WebGLUniformLocation, gl?: WebGLRenderingContext): void {
-    if (this.value !== undefined && location && gl) {
-      if (this.typeFn.indexOf('Matrix') === 0) {
-        (gl as any)[`uniform${this.typeFn}`](location, this.transpose, this.value);
+  update(loc?: WebGLUniformLocation, gl?: WebGL2RenderingContext): void {
+    if (loc && gl && this.value !== undefined) {
+      const fnName = `uniform${this.typeFn}` as keyof WebGL2RenderingContext;
+      if (this.typeFn.startsWith('Matrix')) {
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+        (gl as any)[fnName](loc, this.transpose, this.value);
       } else {
-        (gl as any)[`uniform${this.typeFn}`](location, this.value);
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+        (gl as any)[fnName](loc, this.value);
       }
     }
   }
 
-  /**
-   * Generates the GLSL declaration string for a uniform variable.
-   *
-   * @param {string} name - The name of the uniform variable.
-   * @param {string} type - The shader type for which the declaration is being generated.
-   * @param {number} [length=0] - The length for array-type uniforms, defaults to 0 for non-array uniforms.
-   * @return {string} The GLSL declaration string for the uniform, or an empty string if the uniform should be excluded.
-   */
-  getDeclaration(name: string, type: string, length: number = 0): string {
-    // Skip if this uniform should be excluded from the current shader type
-    if (this.excludeFrom === type) {
-      return '';
-    }
+  getDeclaration(name: string, stage: string, length = 0): string {
+    if (this.excludeFrom === stage) return '';
 
-    // Handle array type
     if (this.type === 'array') {
+      const arr = this.value as Uniform<BasicUniformType>[];
       return (
-        (this.value[0] as Uniform).getDeclaration(name, type, this.value.length) +
-        `\nconst int ${name}_length = ${this.value.length};`
+        arr[0].getDeclaration(name, stage, arr.length) +
+        `\nconst int ${name}_length = ${arr.length};`
       );
     }
 
-    // Handle struct type
     if (this.type === 'struct') {
-      let nameNoPrefix = name.replace('u_', '');
-      nameNoPrefix = nameNoPrefix.charAt(0).toUpperCase() + nameNoPrefix.slice(1);
+      const structName = name.replace(/^u_/, '').replace(/^./, (s) => s.toUpperCase());
 
-      return (
-        `uniform struct ${nameNoPrefix} {\n` +
-        Object.entries(this.value)
-          .map(([fieldName, uniform]) =>
-            (uniform as Uniform).getDeclaration(fieldName, type).replace(/^uniform/, '')
-          )
-          .join('') +
-        `\n} ${name}${length > 0 ? `[${length}]` : ''};`
-      );
+      const entries = Object.entries(this.value as Record<string, Uniform<BasicUniformType>>) as [
+        string,
+        Uniform<BasicUniformType>
+      ][];
+
+      const body = entries
+        .map(([f, u]) => u.getDeclaration(f, stage).replace(/^uniform\s*/, ''))
+        .join('');
+
+      return `uniform struct ${structName} {\n${body}\n} ${name}${
+        length > 0 ? `[${length}]` : ''
+      };`;
     }
 
-    // Basic uniform declaration
     return `uniform ${this.type} ${name}${length > 0 ? `[${length}]` : ''};`;
   }
 }

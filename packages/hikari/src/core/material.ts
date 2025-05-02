@@ -1,7 +1,9 @@
-import { Uniform } from './uniform';
+import { Uniform, UniformType } from './uniform';
+
+type AnyUniform = Uniform<UniformType>;
 
 interface UniformInstance {
-  uniform: Uniform;
+  uniform: AnyUniform;
   location: WebGLUniformLocation;
 }
 
@@ -16,26 +18,25 @@ export class Material {
   vertexShader: WebGLShader;
   fragmentShader: WebGLShader;
   program: WebGLProgram;
-  uniforms: Record<string, Uniform>;
+  uniforms: Record<string, AnyUniform>;
   uniformInstances: UniformInstance[] = [];
-  private context: WebGLRenderingContext;
+  private readonly context: WebGL2RenderingContext;
 
   /**
-   * Constructs a WebGL program by compiling vertex and fragment shaders, linking them, and attaching specified uniforms.
+   * Constructor for initializing a WebGL shader program with specified shaders and uniforms.
    *
-   * @param {WebGLRenderingContext} context - The WebGL rendering context used to create shaders and programs.
-   * @param {string} vertexShaders - Source code for the vertex shader.
-   * @param {string} fragmentShaders - Source code for the fragment shader.
-   * @param {Record<string, Uniform>} [uniforms={}] - A record of specific uniforms to attach to the shaders.
-   * @param {Record<string, Uniform>} commonUniforms - A record of shared/common uniforms to attach to the shaders.
-   * @return {void} This constructor does not return a value.
+   * @param context - The WebGL2 rendering context used to create and manage the program.
+   * @param vertexShaders - The source code for the vertex shader.
+   * @param fragmentShaders - The source code for the fragment shader.
+   * @param [uniforms={}] - Optional record of uniform variables specific to this program.
+   * @param commonUniforms - Record of uniform variables common across shaders.
    */
   constructor(
-    context: WebGLRenderingContext,
+    context: WebGL2RenderingContext,
     vertexShaders: string,
     fragmentShaders: string,
-    uniforms: Record<string, Uniform> = {},
-    commonUniforms: Record<string, Uniform>
+    uniforms: Record<string, AnyUniform> = {},
+    commonUniforms: Record<string, AnyUniform>
   ) {
     this.context = context;
     this.uniforms = uniforms;
@@ -43,7 +44,7 @@ export class Material {
     // Compile shaders
     const prefix = '\n              precision highp float;\n            ';
 
-    // Build vertex shader source
+    // Build the vertex shader source
     this.vertexSource = `
       ${prefix}
       attribute vec4 position;
@@ -54,7 +55,7 @@ export class Material {
       ${vertexShaders}
     `;
 
-    // Build fragment shader source
+    // Build the fragment shader source
     this.fragmentSource = `
       ${prefix}
       ${this.getUniformVariableDeclarations(commonUniforms, 'fragment')}
@@ -62,99 +63,100 @@ export class Material {
       ${fragmentShaders}
     `;
 
-    // Compile shaders
+    // Compile & link
     this.vertexShader = this.getShaderByType(context.VERTEX_SHADER, this.vertexSource);
     this.fragmentShader = this.getShaderByType(context.FRAGMENT_SHADER, this.fragmentSource);
-
-    // Create and link program
     this.program = context.createProgram() as WebGLProgram;
     context.attachShader(this.program, this.vertexShader);
     context.attachShader(this.program, this.fragmentShader);
     context.linkProgram(this.program);
 
-    // Check for linking errors
     if (!context.getProgramParameter(this.program, context.LINK_STATUS)) {
       console.error(context.getProgramInfoLog(this.program));
     }
 
-    // Use the program and attach uniforms
+    // Attach uniforms
     context.useProgram(this.program);
     this.attachUniforms(undefined, commonUniforms);
     this.attachUniforms(undefined, uniforms);
   }
 
   /**
-   * Attaches uniforms to the WebGL program, processing arrays, structs, or individual uniform variables.
+   * Attaches uniform variables to the current WebGL program.
+   * This method processes and maps uniform values, arrays,
+   * or structures to their corresponding locations in the shader program.
    *
-   * @param {string} [name] - The name of the uniform or the prefix for array or struct uniforms. If undefined, all uniforms in the collection are processed.
-   * @param {Uniform | Record<string, Uniform>} [uniforms] - The uniform(s) to attach. May be an individual uniform, an array, or a struct.
-   * @return {void} This method does not return any value.
+   * @param [name] - The name of the uniform or the base name for uniform arrays and structs.
+   * If undefined, all uniforms from the provided object will be processed.
+   * @param [uniforms] - The uniform or collection of uniforms to attach.
+   * It can be a single uniform value, an array of uniforms, or a struct containing multiple uniforms.
    */
-  attachUniforms(name?: string, uniforms?: Uniform | Record<string, Uniform>): void {
-    // If name is undefined, process all uniforms in the collection
-    if (name === undefined && uniforms !== undefined) {
-      Object.entries(uniforms).forEach(([uniformName, uniform]) => {
-        this.attachUniforms(uniformName, uniform);
+  attachUniforms(name?: string, uniforms?: AnyUniform | Record<string, AnyUniform>): void {
+    if (!uniforms) return;
+
+    if (name === undefined) {
+      Object.entries(uniforms as Record<string, AnyUniform>).forEach(([key, u]) =>
+        this.attachUniforms(key, u)
+      );
+      return;
+    }
+
+    const uni = uniforms as AnyUniform;
+
+    if (uni.type === 'array') {
+      (uni.value as AnyUniform[]).forEach((u, i) => this.attachUniforms(`${name}[${i}]`, u));
+      return;
+    }
+
+    if (uni.type === 'struct') {
+      Object.entries(uni.value as Record<string, AnyUniform>).forEach(([field, u]) =>
+        this.attachUniforms(`${name}.${field}`, u)
+      );
+      return;
+    }
+
+    const uniformLocation = this.context.getUniformLocation(this.program, name);
+    if (uniformLocation) {
+      this.uniformInstances.push({
+        uniform: uni,
+        location: uniformLocation
       });
-      return;
     }
-
-    // Skip if either name or uniforms is undefined
-    if (name === undefined || uniforms === undefined) {
-      return;
-    }
-
-    // Handle array type uniforms
-    if (uniforms.type === 'array') {
-      (uniforms.value as Uniform[]).forEach((uniform, i) => {
-        this.attachUniforms(`${name}[${i}]`, uniform);
-      });
-      return;
-    }
-
-    // Handle struct type uniforms
-    if (uniforms.type === 'struct') {
-      Object.entries(uniforms.value).forEach(([field, uniform]) => {
-        this.attachUniforms(`${name}.${field}`, uniform as Uniform);
-      });
-      return;
-    }
-
-    // Handle basic uniforms
-    this.uniformInstances.push({
-      uniform: uniforms as Uniform,
-      location: this.context.getUniformLocation(this.program, name) as WebGLUniformLocation
-    });
   }
 
   /**
-   * Retrieves and compiles a WebGLShader of a specified type using the provided source code.
+   * Compiles and returns a WebGL shader of the specified type using the provided source code.
    *
-   * @param {number} type - The type of the shader to be created (e.g., Vertex or Fragment Shader).
-   * @param {string} source - The source code for the shader.
-   * @return {WebGLShader} - The compiled WebGLShader object.
+   * @param type - The type of shader to be created (e.g., `gl.VERTEX_SHADER` or `gl.FRAGMENT_SHADER`).
+   * @param source - The GLSL source code for the shader.
+   * @return The compiled shader object.
    */
   private getShaderByType(type: number, source: string): WebGLShader {
-    const shader = this.context.createShader(type) as WebGLShader;
-
-    this.context.shaderSource(shader, source);
-    this.context.compileShader(shader);
-
-    // Check for compilation errors
-    if (!this.context.getShaderParameter(shader, this.context.COMPILE_STATUS)) {
-      console.error(this.context.getShaderInfoLog(shader));
+    const gl = this.context;
+    const shader = gl.createShader(type) as WebGLShader;
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.error(gl.getShaderInfoLog(shader));
     }
-
     return shader;
   }
 
   /**
-   * Generates uniform variable declarations by iterating through the provided uniforms.
+   * Generates uniform variable declarations for a given set of uniforms and shader stage.
    *
-   * @param {Record<string, Uniform>} uniforms - A record containing uniform*/
-  private getUniformVariableDeclarations(uniforms: Record<string, Uniform>, type: string): string {
+   * @param uniforms - An object representing uniform variables,
+   *                   where the key is the uniform name and the value is an instance of AnyUniform.
+   * @param shaderStage - The shader stage (e.g., "vertex" or "fragment") for which the uniform declarations are being generated.
+   * @return A concatenated string of uniform variable declarations, formatted for the specified shader stage.
+   */
+  private getUniformVariableDeclarations(
+    uniforms: Record<string, AnyUniform>,
+    shaderStage: string
+  ): string {
     return Object.entries(uniforms)
-      .map(([name, uniform]) => uniform.getDeclaration(name, type))
+      .map(([name, u]) => u.getDeclaration(name, shaderStage))
+      .filter((line) => line.length > 0)
       .join('\n');
   }
 }

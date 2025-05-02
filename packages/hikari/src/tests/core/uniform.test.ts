@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { Uniform } from '../../core/uniform';
+import { Uniform, uniformTypeFns } from '../../core';
 
 describe('Uniform', () => {
   describe('constructor', () => {
@@ -29,22 +29,13 @@ describe('Uniform', () => {
     });
     
     it('should set the correct typeFn based on type', () => {
-      // Test all supported types
-      const types = {
-        float: '1f',
-        int: '1i',
-        vec2: '2fv',
-        vec3: '3fv',
-        vec4: '4fv',
-        mat4: 'Matrix4fv'
-      };
-      
-      Object.entries(types).forEach(([type, expectedTypeFn]) => {
+      Object.entries(uniformTypeFns).forEach(([type, expectedTypeFn]) => {
+        // @ts-expect-error 'type' is already enforced as one of the right typeFNs for the test.
         const uniform = new Uniform({ type, value: null });
         expect(uniform.typeFn).toBe(expectedTypeFn);
       });
-      
-      // Test unsupported type (should default to '1f')
+
+      // @ts-expect-error while supported is not part of the defined typeFNs, it should default to 1f.
       const unsupportedUniform = new Uniform({ type: 'unsupported', value: null });
       expect(unsupportedUniform.typeFn).toBe('1f');
     });
@@ -52,12 +43,13 @@ describe('Uniform', () => {
   
   describe('update', () => {
     it('should not update if value is undefined', () => {
+      // @ts-expect-error 'undefined' is indeed an incorrect value for this uniform, so we have got to test it.
       const uniform = new Uniform({ type: 'float', value: undefined });
       const gl = {
         uniform1f: vi.fn()
       };
       
-      uniform.update({} as WebGLUniformLocation, gl as unknown as WebGLRenderingContext);
+      uniform.update({} as WebGLUniformLocation, gl as unknown as WebGL2RenderingContext);
       expect(gl.uniform1f).not.toHaveBeenCalled();
     });
     
@@ -67,7 +59,7 @@ describe('Uniform', () => {
         uniform1f: vi.fn()
       };
       
-      uniform.update(undefined, gl as unknown as WebGLRenderingContext);
+      uniform.update(undefined, gl as unknown as WebGL2RenderingContext);
       expect(gl.uniform1f).not.toHaveBeenCalled();
     });
     
@@ -87,13 +79,14 @@ describe('Uniform', () => {
       };
       
       Object.entries(types).forEach(([type, { typeFn, value, mockFn }]) => {
+        // @ts-expect-error 'type' is already enforced as one of the right typeFNs for the test.
         const uniform = new Uniform({ type, value });
         const gl = {
           [`uniform${typeFn}`]: mockFn
         };
         
         const location = {} as WebGLUniformLocation;
-        uniform.update(location, gl as unknown as WebGLRenderingContext);
+        uniform.update(location, gl as unknown as WebGL2RenderingContext);
         
         expect(mockFn).toHaveBeenCalledWith(location, value);
       });
@@ -111,7 +104,7 @@ describe('Uniform', () => {
       };
       
       const location = {} as WebGLUniformLocation;
-      uniform.update(location, gl as unknown as WebGLRenderingContext);
+      uniform.update(location, gl as unknown as WebGL2RenderingContext);
       
       expect(gl.uniformMatrix4fv).toHaveBeenCalledWith(
         location,
@@ -132,7 +125,7 @@ describe('Uniform', () => {
       };
       
       const location = {} as WebGLUniformLocation;
-      uniform.update(location, gl as unknown as WebGLRenderingContext);
+      uniform.update(location, gl as unknown as WebGL2RenderingContext);
       
       expect(gl.uniformMatrix4fv).toHaveBeenCalledWith(
         location,

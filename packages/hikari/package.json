@@ -33,6 +33,5 @@
   "files": [
     "dist",
     "!**/*.tsbuildinfo"
-  ],
-  "dependencies": {}
+  ]
 }

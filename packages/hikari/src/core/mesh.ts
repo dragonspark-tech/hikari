@@ -16,16 +16,16 @@ export class Mesh {
   material: Material;
   wireframe = false;
   attributeInstances: AttributeInstance[] = [];
-  private readonly context: WebGLRenderingContext;
+  private readonly context: WebGL2RenderingContext;
 
   /**
    * Creates an instance of the class to handle rendering of a plane geometry with a specified material in a WebGL context.
    *
-   * @param {WebGLRenderingContext} context - The WebGL context used for rendering.
+   * @param {WebGL2RenderingContext} context - The WebGL context used for rendering.
    * @param {PlaneGeometry} geometry - The geometry data describing the plane.
    * @param {Material} material - The material providing shaders and rendering properties for the geometry.
    */
-  constructor(context: WebGLRenderingContext, geometry: PlaneGeometry, material: Material) {
+  constructor(context: WebGL2RenderingContext, geometry: PlaneGeometry, material: Material) {
     this.context = context;
     this.geometry = geometry;
     this.material = material;

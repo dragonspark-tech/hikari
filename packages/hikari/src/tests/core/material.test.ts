@@ -1,7 +1,42 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Material } from '../../core/material';
-import { Uniform } from '../../core/uniform';
-import { mockWebGLContext } from '../mocks/mock-webglcontext';
+import { Material, Uniform, UniformType } from '../../core';
+
+const mockWebGLContext = {
+  viewport: vi.fn(),
+  clearColor: vi.fn(),
+  clearDepth: vi.fn(),
+  createBuffer: vi.fn(() => ({})),
+  createProgram: vi.fn(() => ({})),
+  createShader: vi.fn(() => ({})),
+  shaderSource: vi.fn(),
+  compileShader: vi.fn(),
+  attachShader: vi.fn(),
+  linkProgram: vi.fn(),
+  getProgramParameter: vi.fn(() => true),
+  getProgramInfoLog: vi.fn(() => ''),
+  getShaderParameter: vi.fn(() => true),
+  getShaderInfoLog: vi.fn(() => ''),
+  useProgram: vi.fn(),
+  getUniformLocation: vi.fn(() => ({})),
+  getAttribLocation: vi.fn(() => 0),
+  enableVertexAttribArray: vi.fn(),
+  vertexAttribPointer: vi.fn(),
+  bindBuffer: vi.fn(),
+  bufferData: vi.fn(),
+  drawElements: vi.fn(),
+  lineWidth: vi.fn(),
+  ARRAY_BUFFER: 34962,
+  ELEMENT_ARRAY_BUFFER: 34963,
+  STATIC_DRAW: 35044,
+  FLOAT: 5126,
+  UNSIGNED_SHORT: 5123,
+  TRIANGLES: 4,
+  LINES: 1,
+  VERTEX_SHADER: 35633,
+  FRAGMENT_SHADER: 35632,
+  LINK_STATUS: 35714,
+  COMPILE_STATUS: 35713
+};
 
 // Mock console.error
 const originalConsoleError = console.error;
@@ -17,8 +52,8 @@ describe('Material', () => {
   let material: Material;
   let vertexShader: string;
   let fragmentShader: string;
-  let uniforms: Record<string, Uniform>;
-  let commonUniforms: Record<string, Uniform>;
+  let uniforms: Record<string, Uniform<UniformType>>;
+  let commonUniforms: Record<string, Uniform<UniformType>>;
   
   beforeEach(() => {
     // Reset mocks
@@ -77,7 +112,7 @@ describe('Material', () => {
       mockWebGLContext.getShaderParameter.mockReturnValueOnce(false);
       
       new Material(
-        mockWebGLContext as unknown as WebGLRenderingContext,
+        mockWebGLContext as unknown as WebGL2RenderingContext,
         vertexShader,
         fragmentShader,
         uniforms,
@@ -93,7 +128,7 @@ describe('Material', () => {
       mockWebGLContext.getProgramParameter.mockReturnValueOnce(false);
       
       new Material(
-        mockWebGLContext as unknown as WebGLRenderingContext,
+        mockWebGLContext as unknown as WebGL2RenderingContext,
         vertexShader,
         fragmentShader,
         uniforms,

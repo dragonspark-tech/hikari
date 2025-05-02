@@ -3,7 +3,7 @@ import { Attribute } from './attribute';
 interface GeometryAttributes {
   position: Attribute;
   uv: Attribute;
-  uvNorm: Attribute;
+    uvNorm: Attribute;
   index: Attribute;
 }
 
@@ -25,16 +25,15 @@ export class PlaneGeometry {
   /**
    * Constructs a new instance and initializes attributes and topology for rendering in WebGL.
    *
-   * @param {WebGLRenderingContext} context - The WebGL rendering context.
-   * @param {number} width - The width of the grid or object being rendered.
-   * @param {number} height - The height of the grid or object being rendered.
-   * @param {number} [xSegments=1] - The number of segments along the x-axis.
-   * @param {number} [ySegments=1] - The number of segments along the y-axis.
-   * @param {string} [orientation='xz'] - The orientation of the grid or object ('xz', 'xy', etc.).
-   * @return {void} No return value.
+   * @param context - The WebGL rendering context.
+   * @param width - The width of the grid or object being rendered.
+   * @param height - The height of the grid or object being rendered.
+   * @param [xSegments=1] - The number of segments along the x-axis.
+   * @param [ySegments=1] - The number of segments along the y-axis.
+   * @param [orientation='xz'] - The orientation of the grid or object ('xz', 'xy', etc.).
    */
   constructor(
-    context: WebGLRenderingContext,
+    context: WebGL2RenderingContext,
     width: number,
     height: number,
     xSegments = 1,
@@ -71,9 +70,8 @@ export class PlaneGeometry {
    * Configures the topology of a grid by specifying the number of segments in both the X and Y directions.
    * Updates vertex, UV, and index data to define the geometry.
    *
-   * @param {number} [xSegments=1] - The number of segments along the X-axis of the grid.
-   * @param {number} [ySegments=1] - The number of segments along the Y-axis of the grid.
-   * @return {void} This method does not return a value.
+   * @param [xSegments=1] - The number of segments along the X-axis of the grid.
+   * @param [ySegments=1] - The number of segments along the Y-axis of the grid.
    */
   setTopology(xSegments = 1, ySegments = 1): void {
     this.xSegCount = xSegments;
@@ -132,18 +130,17 @@ export class PlaneGeometry {
    * Sets the size of the object and adjusts its orientation.
    * Updates vertex positions to reflect the specified dimensions and orientation.
    *
-   * @param {number} [width=1] - The width of the object.
-   * @param {number} [height=1] - The height of the object.
-   * @param {string} [orientation='xz'] - The orientation plane of the object.
-   *                                      It must be a combination of two axes ('xy', 'xz', or 'yz').
-   * @return {void} This method does not return a value.
+   * @param [width=1] - The width of the object.
+   * @param [height=1] - The height of the object.
+   * @param [orientation='xz'] - The orientation plane of the object.
+   *                             It must be a combination of two axes ('xy', 'xz', or 'yz').
    */
   setSize(width = 1, height = 1, orientation = 'xz'): void {
     this.width = width;
     this.height = height;
     this.orientation = orientation;
 
-    // Create position array if it doesn't exist or has wrong size
+    // Create a position array if it doesn't exist or has the wrong size
     if (
       !this.attributes.position.values ||
       this.attributes.position.values.length !== 3 * this.vertexCount

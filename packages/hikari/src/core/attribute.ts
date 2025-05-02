@@ -1,4 +1,4 @@
-interface AttributeOptions {
+export interface AttributeOptions {
   target: number;
   size: number;
   type?: number;
@@ -18,16 +18,15 @@ export class Attribute {
   target: number;
   size: number;
   values?: Float32Array | Uint16Array;
-  private context: WebGLRenderingContext;
+  private context: WebGL2RenderingContext;
 
   /**
    * Creates an instance of a WebGL attribute handler with the given context and options.
    *
-   * @param {WebGLRenderingContext} context - The WebGL rendering context used to manage this attribute.
-   * @param {AttributeOptions} options - Configuration options for the attribute, such as target and size.
-   * @return {void} Does not return a value.
+   * @param context - The WebGL rendering context used to manage this attribute.
+   * @param options - Configuration options for the attribute, such as target and size.
    */
-  constructor(context: WebGLRenderingContext, options: AttributeOptions) {
+  constructor(context: WebGL2RenderingContext, options: AttributeOptions) {
     this.context = context;
     this.type = context.FLOAT;
     this.normalized = false;
@@ -46,8 +45,6 @@ export class Attribute {
    * Updates the buffer data in the WebGL context with the current values.
    * If the `values` property is defined, this method binds the buffer to the specified target
    * and uploads the data to the buffer using WebGL's `STATIC_DRAW` usage pattern.
-   *
-   * @return {void} Does not return a value.
    */
   update(): void {
     if (this.values !== undefined) {

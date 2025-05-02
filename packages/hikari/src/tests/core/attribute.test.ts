@@ -1,6 +1,42 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Attribute } from '../../core/attribute';
-import { mockWebGLContext } from '../mocks/mock-webglcontext';
+import { Attribute } from '../../core';
+
+const mockWebGLContext = {
+  viewport: vi.fn(),
+  clearColor: vi.fn(),
+  clearDepth: vi.fn(),
+  createBuffer: vi.fn(() => ({})),
+  createProgram: vi.fn(() => ({})),
+  createShader: vi.fn(() => ({})),
+  shaderSource: vi.fn(),
+  compileShader: vi.fn(),
+  attachShader: vi.fn(),
+  linkProgram: vi.fn(),
+  getProgramParameter: vi.fn(() => true),
+  getProgramInfoLog: vi.fn(() => ''),
+  getShaderParameter: vi.fn(() => true),
+  getShaderInfoLog: vi.fn(() => ''),
+  useProgram: vi.fn(),
+  getUniformLocation: vi.fn(() => ({})),
+  getAttribLocation: vi.fn(() => 0),
+  enableVertexAttribArray: vi.fn(),
+  vertexAttribPointer: vi.fn(),
+  bindBuffer: vi.fn(),
+  bufferData: vi.fn(),
+  drawElements: vi.fn(),
+  lineWidth: vi.fn(),
+  ARRAY_BUFFER: 34962,
+  ELEMENT_ARRAY_BUFFER: 34963,
+  STATIC_DRAW: 35044,
+  FLOAT: 5126,
+  UNSIGNED_SHORT: 5123,
+  TRIANGLES: 4,
+  LINES: 1,
+  VERTEX_SHADER: 35633,
+  FRAGMENT_SHADER: 35632,
+  LINK_STATUS: 35714,
+  COMPILE_STATUS: 35713
+};
 
 describe('Attribute', () => {
   let attribute: Attribute;
@@ -27,7 +63,7 @@ describe('Attribute', () => {
     });
     
     it('should apply options', () => {
-      const customAttribute = new Attribute(mockWebGLContext as unknown as WebGLRenderingContext, {
+      const customAttribute = new Attribute(mockWebGLContext as unknown as WebGL2RenderingContext, {
         target: mockWebGLContext.ELEMENT_ARRAY_BUFFER,
         size: 2,
         type: 5126, // WebGL FLOAT value
@@ -44,7 +80,7 @@ describe('Attribute', () => {
     
     it('should call update method', () => {
       const updateSpy = vi.spyOn(Attribute.prototype, 'update');
-      new Attribute(mockWebGLContext as unknown as WebGLRenderingContext, {
+      new Attribute(mockWebGLContext as unknown as WebGL2RenderingContext, {
         target: mockWebGLContext.ARRAY_BUFFER,
         size: 3
       });
