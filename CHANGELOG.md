@@ -1,3 +1,16 @@
+# 2.0.0 (2025-05-02)
+
+### 🚀 Features
+
+- **hikari-docs:** Finish first version of document app ([63ce736](https://github.com/dragonspark-tech/hikari/commit/63ce736))
+- **hikari-effects:** Enhance color mixing options ([4535acc](https://github.com/dragonspark-tech/hikari/commit/4535acc))
+- **hikari-preact:** Export new hooks ([6eb8804](https://github.com/dragonspark-tech/hikari/commit/6eb8804))
+- **preact:** Add Preact integration with MorphGradient ([dc01c8c](https://github.com/dragonspark-tech/hikari/commit/dc01c8c))
+
+### ❤️ Thank You
+
+- David S. García (Azæl)
+
 ## 1.0.1 (2025-05-01)
 
 This was a version bump only, there were no code changes.
