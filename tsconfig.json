@@ -17,6 +17,9 @@
     },
     {
       "path": "./packages/hikari-preact"
+    },
+    {
+      "path": "./apps/hikari-docs"
     }
   ]
 }
