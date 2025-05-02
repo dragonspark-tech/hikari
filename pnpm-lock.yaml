@@ -163,11 +163,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/hikari-react
 
-  packages/hikari:
-    devDependencies:
-      vitest:
-        specifier: ^3.1.2
-        version: 3.1.2(@types/node@20.17.32)(@vitest/ui@3.1.2)(jiti@2.4.2)(jsdom@22.1.0)(terser@5.39.0)(yaml@2.7.1)
+  packages/hikari: {}
 
   packages/hikari-effects:
     dependencies:

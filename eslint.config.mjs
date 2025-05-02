@@ -25,17 +25,15 @@ export default [
       ]
     }
   },
-    // override for test files: disable no-non-null-assertion & no-explicit-any
-    {
-      files: [
-        '**/tests/**/*.{ts,tsx,js,jsx}',
-        '**/*.{spec,test}.{ts,tsx,js,jsx}',
-      ],
-      rules: {
-        '@typescript-eslint/no-non-null-assertion': 'off',
-        '@typescript-eslint/no-explicit-any': 'off',
-      },
-    },
+  // override for test files: disable no-non-null-assertion & no-explicit-any
+  {
+    files: ['**/*.{spec,test,mock}.{ts,tsx,js,jsx}'],
+    rules: {
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      "@nx/dependency-checks": 'off'
+    }
+  },
   {
     files: [
       '**/*.ts',
@@ -48,7 +46,6 @@ export default [
       '**/*.mjs'
     ],
     // Override or add rules here
-    rules: {
-    }
+    rules: {}
   }
 ];
