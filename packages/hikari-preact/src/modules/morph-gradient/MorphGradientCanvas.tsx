@@ -16,12 +16,10 @@ export interface MorphGradientProps extends Omit<MorphGradientOptions, 'selector
 }
 
 export const MorphGradientCanvas: FunctionalComponent<MorphGradientProps> = props => {
-  // Separate out onInit so it isn’t buried in “options” below
   const { onInit, class: className, style, ...options } = props;
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gradientRef = useRef<MorphGradient>();
-  // Generate a stable ID exactly once
   const idRef = useRef(`gradient-canvas-${Math.random().toString(36).slice(2, 9)}`);
 
   useLayoutEffect(() => {
