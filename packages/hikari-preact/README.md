@@ -2,7 +2,7 @@
 
 > Preact components and hooks for the [@dragonspark/hikari](https://www.npmjs.com/package/@dragonspark/hikari) WebGL framework.
 
-[![npm version](https://img.shields.io/npm/v/@dragonspark/hikari-react.svg?style=for-the-badge)](https://www.npmjs.com/package/@dragonspark/hikari-react)
+[![npm version](https://img.shields.io/npm/v/@dragonspark/hikari-preact.svg?style=for-the-badge)](https://www.npmjs.com/package/@dragonspark/hikari-preact)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 ## 🧩 Features
@@ -24,19 +24,19 @@ Note: `@dragonspark/hikari` and `@dragonspark/hikari-effects` are peer dependenc
 
 ## ✨ Available Components
 
-### MorphGradient
+### MorphGradientCanvas
 
 A Preact component wrapper for the MorphGradient effect from hikari-effects.
 
 #### Basic Usage
 
 ```jsx
-import { MorphGradient } from '@dragonspark/hikari-preact';
+import { MorphGradientCanvas } from '@dragonspark/hikari-preact';
 
 function App() {
   return (
     <div className="app">
-      <MorphGradient 
+      <MorphGradientCanvas 
         class="gradient-background"
         baseColor="#ff0000"
         waveColors={['#00ff00', '#0000ff', '#ffff00']}
@@ -64,13 +64,13 @@ You can define gradient colors using CSS variables:
 
 ```jsx
 // The gradient will automatically use the CSS variables
-<MorphGradient className="gradient-background" />
+<MorphGradientCanvas class="gradient-background" />
 ```
 
 You can also pass CSS variables directly:
 
 ```jsx
-<MorphGradient 
+<MorphGradientCanvas 
   class="gradient-background"
   baseColor="var(--gradient-color-1)"
   waveColors={[

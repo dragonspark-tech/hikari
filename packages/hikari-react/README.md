@@ -24,19 +24,19 @@ Note: `@dragonspark/hikari` and `@dragonspark/hikari-effects` are peer dependenc
 
 ## ✨ Available Components
 
-### MorphGradient
+### MorphGradientCanvas
 
 A React component wrapper for the MorphGradient effect from hikari-effects.
 
 #### Basic Usage
 
 ```jsx
-import { MorphGradient } from '@dragonspark/hikari-react';
+import { MorphGradientCanvas } from '@dragonspark/hikari-react';
 
 function App() {
   return (
     <div className="app">
-      <MorphGradient 
+      <MorphGradientCanvas 
         className="gradient-background"
         baseColor="#ff0000"
         waveColors={['#00ff00', '#0000ff', '#ffff00']}
@@ -64,13 +64,13 @@ You can define gradient colors using CSS variables:
 
 ```jsx
 // The gradient will automatically use the CSS variables
-<MorphGradient className="gradient-background" />
+<MorphGradientCanvas className="gradient-background" />
 ```
 
 You can also pass CSS variables directly:
 
 ```jsx
-<MorphGradient 
+<MorphGradientCanvas 
   className="gradient-background"
   baseColor="var(--gradient-color-1)"
   waveColors={[
@@ -125,33 +125,36 @@ const defaultWaveColors = [
 A custom hook for using the MorphGradient effect in React components.
 
 ```jsx
+import { useRef, useEffect } from 'react';
 import { useMorphGradient } from '@dragonspark/hikari-react';
 
 function GradientComponent() {
-  const canvasRef = useRef(null);
+  // 1) Generate a stable canvas ID once
+  const idRef = useRef(`gradient-canvas-${Math.random().toString(36).substring(2, 9)}`);
 
-  const { gradient, isInitialized } = useMorphGradient({
-    canvasRef,
+  // 2) Initialize the gradient on that ID
+  const { gradient, isInitialized, pause } = useMorphGradient({
+    canvasId: idRef.current,
     baseColor: '#3498db',
     waveColors: ['#9b59b6', '#e74c3c', '#f1c40f'],
     amplitude: 320
+    // autoPlay defaults to true
   });
 
-  // You can control the gradient using the returned instance
+  // 3) Pause after 5s once it's running
   useEffect(() => {
-    if (gradient) {
-      // Pause the gradient after 5 seconds
-      const timer = setTimeout(() => {
-        gradient.pause();
-      }, 5000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [gradient]);
+    if (!isInitialized) return;
+    const timer = setTimeout(() => pause(), 5000);
+    return () => clearTimeout(timer);
+  }, [isInitialized, pause]);
 
   return (
     <div className="gradient-container">
-      <canvas ref={canvasRef} className="gradient-canvas" />
+      <canvas
+        id={idRef.current}
+        className="gradient-canvas"
+        style={{ width: '100%', height: '100%' }}
+      />
     </div>
   );
 }

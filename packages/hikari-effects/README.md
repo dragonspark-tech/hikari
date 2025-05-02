@@ -55,8 +55,7 @@ You can define gradient colors using CSS variables:
 ```
 
 ```javascript
-// The gradient will automatically use the CSS variables
-const gradient = new MorphGradientCanvas({
+const gradient = new MorphGradient({
   selector: '#canvas'
 });
 ```
@@ -64,7 +63,7 @@ const gradient = new MorphGradientCanvas({
 You can also pass CSS variables directly:
 
 ```javascript
-const gradient = new MorphGradientCanvas({
+const gradient = new MorphGradient({
   selector: '#canvas',
   baseColor: 'var(--gradient-color-1)',
   waveColors: [
@@ -92,7 +91,7 @@ const defaultWaveColors = [
 #### Customizing the Gradient
 
 ```javascript
-const gradient = new MorphGradientCanvas({
+const gradient = new MorphGradient({
   selector: '#canvas',
   amplitude: 320,       // Wave amplitude
   seed: 5,              // Random seed
@@ -117,6 +116,15 @@ gradient.updateFrequency(0.001);
 
 // Toggle specific color
 gradient.toggleColor(0); // Toggle first color
+
+// Change zoom
+gradient.setZoom(1);
+
+// Change rotation
+gradient.setRotation(45);
+
+// Change density
+gradient.setDensity([0.1, 0.2])
 ```
 
 ## 📖 API Reference
@@ -126,7 +134,7 @@ gradient.toggleColor(0); // Toggle first color
 #### Constructor Options
 
 ```javascript
-new MorphGradientCanvas(options)
+new MorphGradient(options)
 ```
 
 - `options.selector`: string - CSS selector for the canvas element
@@ -155,6 +163,9 @@ new MorphGradientCanvas(options)
 - `updateFrequency(delta)`: Update the frequency by the specified delta
 - `toggleColor(index)`: Toggle the visibility of a color by index
 - `resize()`: Resize the gradient to fit the container
+- `setZoom(zoom)`: Set the zoom level of the gradient
+- `setRotation(rotation)`: Set the rotation angle in degrees
+- `setDensity(density)`: Set the density of the mesh as [x, y] values
 
 ## 💡 Examples
 

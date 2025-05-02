@@ -124,6 +124,8 @@ new HikariGL(options)
 ## 📦 Related Packages
 
 - [@dragonspark/hikari-effects](https://www.npmjs.com/package/@dragonspark/hikari-effects) - Ready-to-use visual effects built on top of hikari
+- [@dragonspark/hikari-react](https://www.npmjs.com/package/@dragonspark/hikari-react) - React components and hooks for hikari effects
+- [@dragonspark/hikari-preact](https://www.npmjs.com/package/@dragonspark/hikari-preact) - Preact components and hooks for hikari effects
 
 ## 📝 License
 
