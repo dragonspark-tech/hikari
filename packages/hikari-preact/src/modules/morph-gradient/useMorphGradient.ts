@@ -52,7 +52,11 @@ export function useMorphGradient({
 
   useEffect(() => {
     if (!isInitialized) return;
-    autoPlay ? gradientRef.current?.play() : gradientRef.current?.pause();
+    if (autoPlay) {
+      gradientRef.current?.play();
+    } else {
+      gradientRef.current?.pause()
+    }
   }, [autoPlay, isInitialized]);
 
   return {
