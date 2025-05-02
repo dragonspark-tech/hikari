@@ -9,7 +9,7 @@
 </h1>
 
 <p align="center">
-    <img alt="Static Badge" src="https://img.shields.io/badge/Mantained%20with-Nx%2021-blue?style=for-the-badge">
+    <img alt="Static Badge" src="https://img.shields.io/badge/Mantained%20with-Nx%2020-blue?style=for-the-badge">
     <img alt="Static Badge" src="https://img.shields.io/badge/License-MIT-purple?style=for-the-badge">
 </p>
 
