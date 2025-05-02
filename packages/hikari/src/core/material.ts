@@ -1,4 +1,5 @@
 import { Uniform, UniformType } from './uniform';
+import { CommonUniforms } from '../hikari';
 
 type AnyUniform = Uniform<UniformType>;
 
@@ -36,7 +37,7 @@ export class Material {
     vertexShaders: string,
     fragmentShaders: string,
     uniforms: Record<string, AnyUniform> = {},
-    commonUniforms: Record<string, AnyUniform>
+    commonUniforms: CommonUniforms
   ) {
     this.context = context;
     this.uniforms = uniforms;

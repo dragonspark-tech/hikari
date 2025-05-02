@@ -10,6 +10,15 @@ import {
   UniformType
 } from './core';
 
+export interface CommonUniforms {
+  projectionMatrix: Uniform<'mat4'>;
+  modelViewMatrix: Uniform<'mat4'>;
+  resolution: Uniform<'vec2'>;
+  aspectRatio: Uniform;
+
+  [key: string]: Uniform<UniformType>;
+}
+
 export interface HikariGLOptions {
   canvas: HTMLCanvasElement;
   width?: number;
@@ -28,7 +37,7 @@ export class HikariGL {
   width!: number;
   height!: number;
   debug: (message: string, ...args: (string | object)[]) => void;
-  commonUniforms: Record<string, Uniform<UniformType>>;
+  commonUniforms: CommonUniforms;
 
   private lastDebugMsg?: Date;
 
