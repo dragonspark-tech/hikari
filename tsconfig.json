@@ -10,9 +10,6 @@
       "path": "./packages/hikari-effects"
     },
     {
-      "path": "./apps/hikari-demo"
-    },
-    {
       "path": "./packages/hikari-react"
     },
     {

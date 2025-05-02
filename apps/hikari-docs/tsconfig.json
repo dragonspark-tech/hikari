@@ -3,6 +3,15 @@
   "include": [],
   "references": [
     {
+      "path": "../../packages/hikari-react"
+    },
+    {
+      "path": "../../packages/hikari-effects"
+    },
+    {
+      "path": "../../packages/hikari"
+    },
+    {
       "path": "./tsconfig.app.json"
     }
   ],
