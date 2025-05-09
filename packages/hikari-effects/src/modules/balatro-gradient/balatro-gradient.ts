@@ -61,6 +61,7 @@ export interface BalatroGradientOptions {
   maxFrameTimeStep?: number;
   debug?: boolean;
   density?: [number, number];
+  wireframe?: boolean;
 }
 
 /**
@@ -183,6 +184,7 @@ export class BalatroGradient {
       if (options.maxFrameTimeStep !== undefined) this.maxFrameTimeStep = options.maxFrameTimeStep;
       if (options.density !== undefined) this.conf.density = options.density;
       if (options.debug !== undefined) this.debug = options.debug;
+      if (options.wireframe !== undefined) this.conf.wireframe = options.wireframe;
 
       // Initialize gradient if the selector is provided
       if (options.selector) {
