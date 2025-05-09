@@ -1,7 +1,7 @@
 {
   "name": "@dragonspark/hikari-effects",
   "description": "Ready-to-use visual effects built on top of the @dragonspark/hikari WebGL framework.",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "license": "MIT",
   "repository": {
     "type": "git",

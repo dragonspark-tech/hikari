@@ -1,3 +1,21 @@
+## 2.1.0 (2025-05-09)
+
+### 🚀 Features
+
+- **hikari-docs:** Add Balatro gradient feature to docs ([f8f1ce7](https://github.com/dragonspark-tech/hikari/commit/f8f1ce7))
+- **hikari-effects:** Implement balatro-style gradient effect ([218ea40](https://github.com/dragonspark-tech/hikari/commit/218ea40))
+- **hikari-effects:** Add wireframe option for balatro ([c77b9a7](https://github.com/dragonspark-tech/hikari/commit/c77b9a7))
+- **hikari-preact:** Add Balatro preact gradient rendering components ([b1075e1](https://github.com/dragonspark-tech/hikari/commit/b1075e1))
+- **hikari-react:** Add Balatro gradient react components ([b81d384](https://github.com/dragonspark-tech/hikari/commit/b81d384))
+
+### 🩹 Fixes
+
+- **hikari:** Ensure valid attribute and uniform usage ([c4547f4](https://github.com/dragonspark-tech/hikari/commit/c4547f4))
+
+### ❤️ Thank You
+
+- David S. García (Azæl)
+
 # 2.0.0 (2025-05-02)
 
 ### 🚀 Features
