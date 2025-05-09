@@ -16,6 +16,7 @@
 > _**Hikari** is a lightweight WebGL framework for creating stunning visual 
 > effects and rendering 3D/2D graphics in the browser._
 
+We have a demo now! Visit it it at [hikari.dragonspark.io](https://hikari.dragonspark.io) :)
 
 ## ✨ Overview
 
