@@ -1,5 +1,5 @@
-import { vertexShader } from '../../shaders/vertex';
-import { fragmentShader } from '../../shaders/fragment';
+import { vertexShader } from './shaders/vertex';
+import { fragmentShader } from './shaders/fragment';
 import { noiseShader } from '../../shaders/noise';
 import { blendShader } from '../../shaders/blend';
 import { normalizeColor } from '../../utils/colors';
@@ -126,7 +126,7 @@ export class MorphGradient {
 
   // Color Mix
   applyColorMix = true;
-  colorMixPower = 5;
+  colorMixPower = window.innerWidth < 600 ? 5 : 6;
   colorMixValues: [number, number, number] = [0, 0.4, 0];
 
   // Active colors
@@ -255,7 +255,7 @@ export class MorphGradient {
     this.mesh.geometry.setTopology(this.xSegCount, this.ySegCount);
     this.mesh.geometry.setSize(this.width, this.height);
 
-    this.mesh.material.uniforms.u_color_mix_power.value = this.width < 600 ? 5 : 6;
+    this.mesh.material.uniforms.u_color_mix_power.value = this.colorMixPower;
     this.mesh.wireframe = this.conf.wireframe;
   };
 
