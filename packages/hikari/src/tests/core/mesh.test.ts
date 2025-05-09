@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Material, Mesh, PlaneGeometry } from '../../core';
+import { CommonUniforms } from '../../hikari';
 
 const mockWebGLContext = {
   viewport: vi.fn(),
@@ -93,7 +94,7 @@ describe('Mesh', () => {
       'void main() {}',
       'void main() {}',
       {},
-      {}
+      {} as CommonUniforms
     );
     
     // Create mesh

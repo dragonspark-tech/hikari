@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Material, Uniform, UniformType } from '../../core';
+import { CommonUniforms } from '../../hikari';
 
 const mockWebGLContext = {
   viewport: vi.fn(),
@@ -53,7 +54,7 @@ describe('Material', () => {
   let vertexShader: string;
   let fragmentShader: string;
   let uniforms: Record<string, Uniform<UniformType>>;
-  let commonUniforms: Record<string, Uniform<UniformType>>;
+  let commonUniforms: CommonUniforms;
   
   beforeEach(() => {
     // Reset mocks
@@ -70,7 +71,9 @@ describe('Material', () => {
     
     commonUniforms = {
       projectionMatrix: new Uniform({ type: 'mat4', value: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1] }),
-      resolution: new Uniform({ type: 'vec2', value: [800, 600] })
+      resolution: new Uniform({ type: 'vec2', value: [800, 600] }),
+      modelViewMatrix: new Uniform({ type: 'mat4', value: []}),
+      aspectRatio: new Uniform({ type: 'float', value: 1})
     };
     
     // Create material
