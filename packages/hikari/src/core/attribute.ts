@@ -63,7 +63,7 @@ export class Attribute {
   attach(name: string, program: WebGLProgram): number {
     const location = this.context.getAttribLocation(program, name);
 
-    if (this.target === this.context.ARRAY_BUFFER) {
+    if (this.target === this.context.ARRAY_BUFFER && location >= 0) {
       this.context.enableVertexAttribArray(location);
       this.context.vertexAttribPointer(location, this.size, this.type, this.normalized, 0, 0);
     }
@@ -80,7 +80,7 @@ export class Attribute {
   use(location: number): void {
     this.context.bindBuffer(this.target, this.buffer);
 
-    if (this.target === this.context.ARRAY_BUFFER) {
+    if (this.target === this.context.ARRAY_BUFFER && location >= 0) {
       this.context.enableVertexAttribArray(location);
       this.context.vertexAttribPointer(location, this.size, this.type, this.normalized, 0, 0);
     }

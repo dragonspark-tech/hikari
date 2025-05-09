@@ -22,7 +22,8 @@ export const uniformTypeFns = {
   vec3: '3fv',
   vec4: '4fv',
   mat4: 'Matrix4fv',
-  struct: 'struct'
+  struct: 'struct',
+  bool: '1i'
 } as const;
 
 export type BasicUniformType = keyof typeof uniformTypeFns;
@@ -47,6 +48,9 @@ export type UniformValue<T extends UniformType> =
     : // struct is a dict of sub-Uniforms
     T extends 'struct'
     ? Record<string, Uniform<BasicUniformType>>
+    : // booleans are 1-1
+    T extends 'bool'
+    ? boolean
     : // otherwise never
       never;
 
@@ -82,9 +86,12 @@ export class Uniform<T extends UniformType = 'float'> {
   update(loc?: WebGLUniformLocation, gl?: WebGL2RenderingContext): void {
     if (loc && gl && this.value !== undefined) {
       const fnName = `uniform${this.typeFn}` as keyof WebGL2RenderingContext;
+
       if (this.typeFn.startsWith('Matrix')) {
         /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
         (gl as any)[fnName](loc, this.transpose, this.value);
+      } else if (this.type === 'bool') {
+        (gl as any)[fnName](loc, this.value ? 1 : 0);
       } else {
         /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
         (gl as any)[fnName](loc, this.value);
