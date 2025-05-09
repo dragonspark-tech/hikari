@@ -4,6 +4,7 @@ import { RiHomeOfficeFill } from 'react-icons/ri';
 import { Link } from '@tanstack/react-router';
 import { MdGradient } from 'react-icons/md';
 import { BsGithub } from 'react-icons/bs';
+import { GiCardJoker } from 'react-icons/gi';
 
 export const SideNav = () => {
   return (
@@ -15,6 +16,9 @@ export const SideNav = () => {
         </NavItem>
         <NavItem to="/morph-gradient">
           <MdGradient />
+        </NavItem>
+        <NavItem to="/balatro-gradient">
+          <GiCardJoker />
         </NavItem>
       </div>
       <div></div>

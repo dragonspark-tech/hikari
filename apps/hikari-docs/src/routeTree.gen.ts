@@ -12,6 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as MorphGradientImport } from './routes/morph-gradient'
+import { Route as BalatroGradientImport } from './routes/balatro-gradient'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
@@ -19,6 +20,12 @@ import { Route as IndexImport } from './routes/index'
 const MorphGradientRoute = MorphGradientImport.update({
   id: '/morph-gradient',
   path: '/morph-gradient',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const BalatroGradientRoute = BalatroGradientImport.update({
+  id: '/balatro-gradient',
+  path: '/balatro-gradient',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -39,6 +46,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/balatro-gradient': {
+      id: '/balatro-gradient'
+      path: '/balatro-gradient'
+      fullPath: '/balatro-gradient'
+      preLoaderRoute: typeof BalatroGradientImport
+      parentRoute: typeof rootRoute
+    }
     '/morph-gradient': {
       id: '/morph-gradient'
       path: '/morph-gradient'
@@ -53,36 +67,41 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/balatro-gradient': typeof BalatroGradientRoute
   '/morph-gradient': typeof MorphGradientRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/balatro-gradient': typeof BalatroGradientRoute
   '/morph-gradient': typeof MorphGradientRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/balatro-gradient': typeof BalatroGradientRoute
   '/morph-gradient': typeof MorphGradientRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/morph-gradient'
+  fullPaths: '/' | '/balatro-gradient' | '/morph-gradient'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/morph-gradient'
-  id: '__root__' | '/' | '/morph-gradient'
+  to: '/' | '/balatro-gradient' | '/morph-gradient'
+  id: '__root__' | '/' | '/balatro-gradient' | '/morph-gradient'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BalatroGradientRoute: typeof BalatroGradientRoute
   MorphGradientRoute: typeof MorphGradientRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BalatroGradientRoute: BalatroGradientRoute,
   MorphGradientRoute: MorphGradientRoute,
 }
 
@@ -97,11 +116,15 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/balatro-gradient",
         "/morph-gradient"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/balatro-gradient": {
+      "filePath": "balatro-gradient.tsx"
     },
     "/morph-gradient": {
       "filePath": "morph-gradient.tsx"
